@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="result-master-wrapper py-5 min-vh-100 d-flex align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-8">
+
+                <div class="result-card shadow-2xl border-0 rounded-5 overflow-hidden bg-white">
+                    <div class="status-bar {% if is_passed %}bg-success{% else %}bg-danger{% endif %}"></div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <div class="text-center mb-4">
+                            <div class="status-bubble mb-3 {% if is_passed %}text-success bg-success-soft{% else %}text-danger bg-danger-soft{% endif %}">
+                                {% if is_passed %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-redo-alt"></i>
+                                {% endif %}
+                            </div>
+                            <h2 class="fw-black text-dark mb-1">{% if is_passed %}Ajoyib!{% else %}Yana bir bor{% endif %}</h2>
+                            <p class="smallest fw-bold text-muted tracking-widest text-uppercase">{{ quiz.title }}</p>
+                        </div>
+
+                        <div class="score-display-zone mb-4">
+                            <div class="text-center position-relative d-inline-block w-100 mb-3">
+                                <h1 class="display-1 fw-black text-slate-900 mb-0" style="letter-spacing: -3px;">
+                                    {{ score|floatformat:0 }}<span class="fs-2 text-muted opacity-50">%</span>
+                                </h1>
+                                <div class="score-label-pill {% if is_passed %}bg-success{% else %}bg-danger{% endif %} shadow-sm">
+                                    {% if is_passed %}PASS{% else %}FAIL{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="px-5 mb-4">
+                                <div class="progress-track">
+                                    <div class="progress-fill {% if is_passed %}bg-success{% else %}bg-danger{% endif %}"
+                                         style="width: {{ score }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="trend-card mt-4 p-4 rounded-4 bg-white border-0 shadow-sm">
+                                <h6 class="fw-black text-slate-900 mb-4 smallest tracking-widest text-uppercase">Bilim darajasi trendi</h6>
+                                <div class="chart-container" style="height: 150px; width: 100%;">
+                                    <svg id="trendSvg" viewBox="0 0 500 150" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: hidden;">
+                                        <line x1="0" y1="20" x2="500" y2="20" stroke="#f1f5f9" stroke-width="1" />
+                                        <line x1="0" y1="75" x2="500" y2="75" stroke="#f1f5f9" stroke-width="1" />
+                                        <line x1="0" y1="130" x2="500" y2="130" stroke="#f1f5f9" stroke-width="2" />
+
+                                        <path id="trendPath" d="" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+
+                                        <g id="chartPoints"></g>
+                                    </svg>
+                                </div>
+                                <div class="d-flex justify-content-between mt-3 px-1">
+                                    {% for h in history %}
+                                        <span class="smallest fw-bold text-slate-400">{{ h.completed_at|date:"d/m" }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-row d-flex border rounded-4 overflow-hidden mb-4 bg-slate-50">
+                            <div class="col-6 p-3 border-end text-center">
+                                <span class="d-block smallest text-slate-400 fw-bold mb-1">O'TISH BALI</span>
+                                <span class="fw-bold text-slate-700">{{ quiz.pass_percentage }}%</span>
+                            </div>
+                            <div class="col-6 p-3 text-center">
+                                <span class="d-block smallest text-slate-400 fw-bold mb-1">URINISHLAR</span>
+                                <span class="fw-bold text-slate-700">{{ history|length }} ta</span>
+                            </div>
+                        </div>
+
+                        {% if user == attempt.user %}
+                            <div class="mt-4 p-4 rounded-4 border-dashed text-center bg-light-soft">
+                                <h6 class="fw-bold mb-2 text-slate-700 small">Umumiy ko'rsatkichlaringiz o'zgardimi?</h6>
+                                <a href="{% url 'student_analytics' %}" class="btn btn-outline-primary rounded-pill px-4 fw-black smallest shadow-sm">
+                                    DINAMIKANI TEKSHIRISH
+                                </a>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2 mt-4">
+                            {% if not is_passed %}
+                            <a href="{% url 'take_quiz' quiz.id %}?reset=1" class="btn btn-dark-modern flex-grow-1 py-3 fw-bold rounded-4 shadow-sm">
+                                <i class="fas fa-sync-alt me-2"></i> Qayta urinish
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'lesson_detail' quiz.lesson.id %}" class="btn btn-outline-soft flex-grow-1 py-3 fw-bold rounded-4">
+                                Kursga qaytish
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-center mt-4 smallest text-slate-400 fw-medium">
+                    <i class="far fa-clock me-1"></i> {{ attempt.completed_at|date:"d.m.Y | H:i" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* --- CORE STYLES --- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
+
+.bg-gradient-dark { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+.result-master-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+.result-card { border: 1px solid #f1f5f9; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); }
+.status-bar { height: 6px; width: 100%; }
+
+/* Typography */
+.fw-black { font-weight: 800; }
+.smallest { font-size: 0.65rem; letter-spacing: 0.05rem; }
+.text-slate-900 { color: #0f172a; }
+.bg-slate-50 { background-color: #f8fafc; }
+
+/* Status Bubble */
+.status-bubble {
+    width: 60px; height: 60px; margin: 0 auto;
+    border-radius: 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+}
+.bg-success-soft { background: #dcfce7; color: #15803d; }
+.bg-danger-soft { background: #fee2e2; color: #b91c1c; }
+
+/* Score & Badge */
+.score-label-pill {
+    display: inline-block; padding: 4px 12px; border-radius: 100px;
+    color: white; font-size: 0.6rem; font-weight: 800;
+    vertical-align: middle; margin-top: -40px; margin-left: 10px;
+}
+
+/* Custom Progress */
+.progress-track { height: 4px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Buttons */
+.btn-dark-modern { background: #1e293b; color: white; border: none; transition: 0.3s; }
+.btn-dark-modern:hover { background: #020617; transform: translateY(-2px); color: white; }
+.btn-outline-soft { border: 1px solid #e2e8f0; color: #64748b; transition: 0.3s; }
+.btn-outline-soft:hover { background: #f8fafc; color: #0f172a; }
+
+.shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
+.rounded-5 { border-radius: 2rem !important; }
+.border-dashed { border: 2px dashed #e2e8f0; }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const scores = [{% for h in history %}{{ h.score }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const svgWidth = 500;
+    const svgHeight = 150;
+    const paddingX = 40; // Yonlardan xavfsiz masofa
+    const paddingY = 30; // Tepa va pastdan xavfsiz masofa (yozuvlar uchun)
+
+    if (scores.length === 0) return;
+
+    const pointsContainer = document.getElementById('chartPoints');
+    const path = document.getElementById('trendPath');
+
+    const chartWidth = svgWidth - (paddingX * 2);
+    const chartHeight = svgHeight - (paddingY * 2);
+
+    // stepX ni to'g'ri hisoblash (Division by zero xatosidan qochish)
+    const stepX = scores.length > 1 ? chartWidth / (scores.length - 1) : 0;
+
+    let pathData = "";
+
+    scores.forEach((score, i) => {
+        // X koordinatasi: bitta nuqta bo'lsa markazda, ko'p bo'lsa yoyiladi
+        const x = scores.length > 1 ? (i * stepX) + paddingX : svgWidth / 2;
+
+        // Y koordinatasi: balandlikka teskari proporsional (0% pastda, 100% tepada)
+        const y = svgHeight - (score * chartHeight / 100) - paddingY;
+
+        pathData += (i === 0 ? "M " : " L ") + x + " " + y;
+
+        // Foiz yozuvi (Nuqtadan 15px tepada)
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", x);
+        text.setAttribute("y", y - 15);
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("font-size", "11px");
+        text.setAttribute("font-weight", "800");
+        text.setAttribute("fill", "#64748b");
+        text.textContent = Math.round(score) + "%";
+        pointsContainer.appendChild(text);
+
+        // Nuqta (Circle)
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x);
+        circle.setAttribute("cy", y);
+        circle.setAttribute("r", "5");
+        circle.setAttribute("fill", "white");
+        circle.setAttribute("stroke", "#4f46e5");
+        circle.setAttribute("stroke-width", "3");
+        circle.style.transition = "all 0.3s ease";
+        circle.style.cursor = "pointer";
+
+        // Hover effekti
+        circle.onmouseover = () => { circle.setAttribute("r", "7"); circle.setAttribute("fill", "#4f46e5"); };
+        circle.onmouseout = () => { circle.setAttribute("r", "5"); circle.setAttribute("fill", "white"); };
+
+        pointsContainer.appendChild(circle);
+    });
+
+    path.setAttribute("d", pathData);
+
+    // Animatsiya: Chiziqning silliq chizilishi
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = length;
+    path.style.strokeDashoffset = length;
+    path.getBoundingClientRect(); // Layoutni yangilash
+    path.style.transition = "stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)";
+    path.style.strokeDashoffset = "0";
+});
+</script>
+{% endblock %}

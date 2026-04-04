@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leaderboard | Premium Academic Analytics{% endblock %}
+
+{% block content %}
+<div class="ultimate-dashboard">
+    <div class="mesh-bg">
+        <div class="mesh-sphere sphere-1"></div>
+        <div class="mesh-sphere sphere-2"></div>
+        <div class="mesh-sphere sphere-3"></div>
+    </div>
+
+    <div class="container py-5 position-relative z-index-2">
+        <header class="text-center mb-5 animate__animated animate__fadeIn">
+            <div class="cyber-chip mb-3">
+                <span class="pulse-indicator"></span>
+                <span class="chip-text">AKADEMIK MONITORING 2026</span>
+            </div>
+            <h1 class="ultra-title">AKADEMIK <span class="gradient-text">RESOURSE</span></h1>
+            <p class="ultra-subtitle mx-auto">Fakultetning eng yuqori intellektual ko'rsatkichli kursantlari</p>
+        </header>
+
+        <div class="row g-4 align-items-end mb-5 pb-5">
+            {% for student in top_3 %}
+            <div class="col-lg-4 col-md-6 {% if forloop.counter == 1 %}order-first order-lg-2{% elif forloop.counter == 2 %}order-lg-1{% else %}order-lg-3{% endif %}">
+                <div class="bento-podium rank-{{ forloop.counter }} animate__animated animate__slideInUp">
+                    <div class="glass-tag">
+                        <i class="fa-solid fa-microchip me-2"></i> {{ student.department.name|default:"Kafedra mavjud emas" }}
+                    </div>
+                    <div class="bento-inner text-center">
+                        <div class="rank-visual-wrapper mb-4">
+                            {% if forloop.counter == 1 %}
+                               <i class="fa-solid fa-crown rank-icon gold"></i>
+                            {% elif forloop.counter == 2 %}
+                                <i class="fa-solid fa-medal rank-icon silver"></i>
+                            {% else %}
+                                <i class="fa-solid fa-medal rank-icon bronze"></i>
+                            {% endif %}
+                        </div>
+                        <div class="avatar-ultra-wrapper mx-auto mb-3">
+                            <div class="rotating-border"></div>
+                            {% if student.avatar %}
+                                <img src="{{ student.avatar.url }}" class="ultra-img" alt="Avatar">
+                            {% else %}
+                                <img src="https://ui-avatars.com/api/?name={{ student.get_full_name }}&background=0f172a&color=4f46e5&size=150" class="ultra-img">
+                            {% endif %}
+                            <div class="rank-floating-pill">#{{ forloop.counter }}</div>
+                        </div>
+                        <h3 class="student-name-premium mb-1">{{ student.get_full_name }}</h3>
+                        <div class="direction-sub mb-4 gradient-text">{{ student.profile.direction|upper|default:"KURSANT" }}</div>
+                        <div class="stat-grid-premium">
+                            <div class="stat-unit">
+                                <span class="u-label">TESTLAR</span>
+                                <span class="u-val">{{ student.total_tests }}</span>
+                            </div>
+                            <div class="stat-unit border-start border-white-10">
+                                <span class="u-label">O'RTACHA</span>
+                                <span class="u-val gradient-text">{{ student.avg_score|floatformat:1 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="galaxy-card shadow-2xl border-0">
+                    <div class="galaxy-header p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="m-0 fw-bold text-white"><i class="fa-solid fa-ranking-star me-2 text-indigo"></i> Umumiy Peshqadamlar</h5>
+                            <p class="m-0 gradient-text small mt-1">4-o'rindan keyingi barcha faol kursantlar ro'yxati</p>
+                        </div>
+                        <div class="counter-pill">{{ others|length|add:3 }} Ta Faol</div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table galaxy-table mb-0 align-middle">
+                            <thead>
+                                <tr class="gradient-text">
+                                    <th class="ps-4">O'RIN</th>
+                                    <th>SHAXSIY MA'LUMOT</th>
+                                    <th>KAFEDRA / YO'NALISH</th>
+                                    <th class="text-center">FAOLLIK</th>
+                                    <th class="text-end pe-4">SAMARADORLIK</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in others %}
+                                <tr class="galaxy-row ">
+                                    <td class="ps-4">
+                                        <div class="rank-index-box ">#{{ forloop.counter|add:3 }}</div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="mini-pfp-wrapper">
+                                            {% if student.avatar %}
+                                                <img src="{{ student.avatar.url }}" class="rounded-circle" width="45" height="45">
+                                            {% else %}
+                                                <img src="https://ui-avatars.com/api/?name={{ student.get_full_name }}&background=4F46E5&color=fff" class="rounded-circle" width="45" height="45">
+                                            {% endif %}
+                                            </div>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-primary mb-0 fs-6">{{ student.get_full_name }}</span>
+                                                <span class="text-muted smallest">ID: 2026-{{ student.id }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="dept-micro-text">{{ student.department.name|default:"Noma'lum Kafedra" }}</span>
+                                            <span class="text-muted smallest text-uppercase">{{ student.profile.direction|default:"Kursant" }}</span>
+                                        </div>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="test-count-badge">
+                                            <i class="fa-solid fa-poll-h me-1 gradient-text"></i> {{ student.total_tests }} ta test
+                                        </div>
+                                    </td>
+
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex flex-column align-items-end">
+                                            <span class="score-final-premium gradient-text">{{ student.avg_score|floatformat:1 }}%</span>
+                                            <div class="progress w-100 mt-2" style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; width: 120px !important;">
+                                                <div class="progress-bar gradient-bar-bg" style="width: {{ student.avg_score }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* --- ULTRA-MODERN PREMIUM DESIGN SYSTEM --- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap');
+
+:root {
+    --deep-bg: #030712;
+    --card-glass: rgba(17, 24, 39, 0.7);
+    --electric-indigo: #6366f1;
+    --cyber-cyan: #22d3ee;
+    --gold-premium: #fbbf24;
+    --white-10: rgba(255, 255, 255, 0.1);
+}
+
+/* --- MUAMMONI HAL QILUVCHI QISM (DUAL SCROLLBAR FIX) --- */
+/* 1. Brauzerning asosiy scrollbarini dizaynlashtirish */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--deep-bg);
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--cyber-cyan), var(--electric-indigo));
+    border-radius: 10px;
+}
+
+/* 2. Ichki elementlardagi ortiqcha scrollbarlarni yashirish */
+.ultimate-dashboard,
+.table-responsive,
+body,
+html {
+    scrollbar-width: thin; /* Firefox uchun */
+    scrollbar-color: var(--electric-indigo) var(--deep-bg); /* Firefox */
+}
+
+/* table-responsive ichidagi scrollbarni faqat kerak bo'lganda (mobil) ko'rsatish,
+   lekin u ham asosiy scrollbar bilan bir xil ko'rinishi uchun */
+.table-responsive::-webkit-scrollbar {
+    height: 4px;
+}
+
+/* O'zgarmagan asosiy stylelar */
+.ultimate-dashboard { background-color: var(--deep-bg); min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #f8fafc; position: relative; }
+.mesh-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.mesh-sphere { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; }
+.sphere-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--electric-indigo); animation: float 15s infinite alternate; }
+.sphere-2 { bottom: 0%; right: -5%; width: 500px; height: 500px; background: var(--cyber-cyan); animation: float 12s infinite alternate-reverse; }
+.sphere-3 { top: 30%; right: 20%; width: 300px; height: 300px; background: #7c3aed; opacity: 0.1; }
+
+@keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(50px, 50px); } }
+
+.ultra-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 3.8rem; letter-spacing: -3px; line-height: 1; }
+.gradient-text { background: linear-gradient(135deg, var(--cyber-cyan) 0%, var(--electric-indigo) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.ultra-subtitle { color: #94a3b8; font-weight: 400; letter-spacing: 1px; max-width: 500px; }
+.cyber-chip { display: inline-flex; align-items: center; background: var(--white-10); padding: 8px 16px; border-radius: 12px; border: 1px solid var(--white-10); backdrop-filter: blur(5px); }
+.pulse-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px #10b981; }
+.chip-text { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #cbd5e1; }
+
+.bento-podium { background: var(--card-glass); backdrop-filter: blur(25px); border-radius: 45px; border: 1px solid var(--white-10); padding: 35px; position: relative; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bento-podium:hover { transform: translateY(-15px) scale(1.02); border-color: var(--electric-indigo); box-shadow: 0 30px 60px -10px rgba(0,0,0,0.5); }
+.rank-1 { height: 460px; z-index: 5; border: 2px solid var(--gold-premium); }
+.rank-2 { height: 400px; }
+.rank-3 { height: 380px; }
+
+.avatar-ultra-wrapper { width: 120px; height: 120px; position: relative; }
+.rank-1 .avatar-ultra-wrapper { width: 150px; height: 150px; }
+.rotating-border { position: absolute; inset: -8px; border: 2px dashed var(--electric-indigo); border-radius: 50%; opacity: 0.4; animation: spin 20s linear infinite; }
+.ultra-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 6px solid var(--deep-bg); background: #0f172a; }
+.rank-floating-pill { position: absolute; bottom: 0; right: 0; background: white; color: black; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 4px solid var(--deep-bg); font-size: 13px; }
+
+.stat-grid-premium { display: flex; background: rgba(0,0,0,0.3); border-radius: 25px; margin-top: 25px; padding: 15px; }
+.stat-unit { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.u-label { font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 1px; }
+.u-val { font-size: 1.5rem; font-weight: 800; }
+
+.galaxy-card { background: var(--card-glass); backdrop-filter: blur(20px); border-radius: 40px; border: 1px solid var(--white-10); overflow: hidden; }
+.galaxy-header { border-bottom: 1px solid var(--white-10); background: rgba(255,255,255,0.02); }
+.counter-pill { background: var(--electric-indigo); padding: 5px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+
+.galaxy-table thead th { background: transparent; color: #475569; font-size: 10px; font-weight: 800; border: none; padding: 25px 20px; letter-spacing: 1.5px; text-transform: uppercase; }
+.galaxy-row { transition: 0.3s; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.galaxy-row:hover { background: rgba(56, 189, 248, 0.05); }
+
+.rank-index-box { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--cyber-cyan); border: 1px solid var(--white-10); font-size: 15px; }
+.dept-micro-text { font-size: 11px; color: var(--electric-indigo); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.test-count-badge { background: rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 700; border: 1px solid var(--white-10); }
+.score-final-premium { font-size: 1.6rem; font-weight: 900; line-height: 1; }
+.gradient-bar-bg { background: linear-gradient(to right, var(--cyber-cyan), var(--electric-indigo)); }
+
+.glass-tag { position: absolute; top: 25px; left: 25px; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 14px; font-size: 10px; font-weight: 800; color: var(--cyber-cyan); border: 1px solid var(--white-10); display: flex; align-items: center; }
+.smallest { font-size: 10px; color: #64748b; }
+
+.gold{color:gold}
+.silver{color:silver}
+.bronze{color: brown}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+{% endblock %}

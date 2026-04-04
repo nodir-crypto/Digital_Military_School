@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profilni tahrirlash | DMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid    min-height: 80vh;">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12">
+
+            <div class="mb-4 ms-2">
+                <a href="{% url 'profile' %}" class="text-decoration-none text-secondary fw-bold small transition-all hover-primary">
+                    <i class="fas fa-arrow-left-long me-2"></i> Shaxsiy kabinetga qaytish
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-2xl overflow-hidden" style="border-radius: 35px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);">
+                <div class="row g-0">
+
+                    <div class="col-md-4 d-none d-md-flex flex-column align-items-center justify-content-center p-5 text-white position-relative"
+                         style="background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);">
+
+                        <div class="position-relative z-3 text-center">
+                            <div class="avatar-wrapper mb-4">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" id="preview-image" class="rounded-circle border border-4 border-white shadow-lg shadow-soft"
+                                         style="width: 150px; height: 150px; object-fit: cover; transition: transform 0.4s ease;">
+                                {% else %}
+                                    <div class="rounded-circle border border-4 border-white d-flex align-items-center justify-content-center mx-auto shadow-lg"
+                                         style="width: 150px; height: 150px; background: rgba(255,255,255,0.2);">
+                                        <i class="fas fa-user-tie fa-5x"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="online-status"></div>
+                            </div>
+
+                            <h3 class="fw-black mb-1 letter-spacing-tight">{{ user.first_name }} {{ user.last_name }}</h3>
+                            <p class="opacity-75 font-monospace small mb-4">{{ user.get_role_display|upper }}</p>
+
+                            <div class="info-pill px-3 py-2 rounded-pill border border-white border-opacity-25 bg-white bg-opacity-10">
+                                <span class="small fw-bold"><i class="fas fa-shield-halved me-2"></i>{{ user.department.name|default:"Tizim foydalanuvchisi" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-shape-1"></div>
+                        <div class="bg-shape-2"></div>
+                    </div>
+
+                    <div class="col-md-8 bg-white p-4 p-lg-5">
+                        <div class="form-header mb-5">
+                            <h2 class="fw-black text-dark mb-2">Profilni tahrirlash</h2>
+                            <p class="text-muted small">Tizimdagi shaxsiy ma'lumotlaringizni yangilash uchun quyidagi maydonlarni to'ldiring.</p>
+                            <div class="h-line"></div>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data" class="modern-form">
+                            {% csrf_token %}
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating custom-input">
+                                        {{ form.first_name }}
+                                        <label for="{{ form.first_name.id_for_label }}">Ismingiz</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating custom-input">
+                                        {{ form.last_name }}
+                                        <label for="{{ form.last_name.id_for_label }}">Familiyangiz</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="form-floating custom-input email-field-wrapper">
+                                        {{ form.email }}
+                                        <label for="{{ form.email.id_for_label }}"><i class="fas fa-envelope me-2"></i>Elektron pochta manzili</label>
+                                        <div class="input-glow"></div>
+                                    </div>
+                                    {% if form.email.errors %}
+                                        <div class="text-danger smallest mt-2 ms-3 fw-bold animate__animated animate__fadeIn">
+                                            <i class="fas fa-exclamation-circle me-1"></i> {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="upload-zone p-4 mt-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="upload-icon-circle me-3">
+                                                <i class="fas fa-image text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1 text-dark">Yangi profil rasmi</h6>
+                                                <p class="text-muted mb-0 smallest">Tavsiya etilgan o'lcham: 500x500px (JPG, PNG)</p>
+                                            </div>
+                                            <div class="file-input-wrapper">
+                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">Faylni tanlash</button>
+                                                {{ form.avatar }}
+                                            </div>
+                                        </div>
+                                        <div id="file-name" class="mt-2 text-primary small fw-bold text-center"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5 d-flex flex-column flex-md-row gap-3">
+                                <button type="submit" class="btn btn-primary rounded-pill py-3 px-5 fw-black flex-grow-1 shadow-primary-hover">
+                                    <i class="fas fa-check-circle me-2"></i>O'zgarishlarni saqlash
+                                </button>
+                                <a href="{% url 'profile' %}" class="btn btn-light rounded-pill py-3 px-4 fw-bold text-muted border">
+                                    Bekor qilish
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Professional Typography & Effects */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+    body { font-family: 'Inter', sans-serif; }
+    .fw-black { font-weight: 900; }
+    .letter-spacing-tight { letter-spacing: -0.5px; }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
+    .smallest { font-size: 0.75rem; }
+
+    /* Avatar Status */
+    .avatar-wrapper { position: relative; display: inline-block; }
+    .online-status {
+        position: absolute; bottom: 8px; right: 12px;
+        width: 22px; height: 22px;
+        background: #10B981; border: 4px solid #3B82F6;
+        border-radius: 50%;
+    }
+
+    /* Custom Inputs */
+    .custom-input input {
+        border: 2px solid #f1f5f9 !important;
+        border-radius: 18px !important;
+        background: #f8fafc !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+        transition: all 0.3s ease;
+    }
+    .custom-input input:focus {
+        border-color: #3b82f6 !important;
+        background: #fff !important;
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1) !important;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+        border: 2px dashed #e2e8f0;
+        border-radius: 20px;
+        background: #fbfcfe;
+        transition: 0.3s;
+    }
+    .upload-zone:hover { border-color: #3b82f6; background: #f0f7ff; }
+
+    .file-input-wrapper { position: relative; overflow: hidden; }
+    .file-input-wrapper input[type="file"] {
+        position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
+    }
+
+    .upload-icon-circle {
+        width: 48px; height: 48px;
+        background: #fff; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    /* Buttons */
+    .shadow-primary-hover { transition: 0.3s; }
+    .shadow-primary-hover:hover {
+        background-color: #312e81;
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+    }
+
+    /* Decoration Shapes */
+    .bg-shape-1 {
+        position: absolute; top: -50px; left: -50px; width: 200px; height: 200px;
+        background: rgba(255,255,255,0.1); border-radius: 50%;
+    }
+    .bg-shape-2 {
+        position: absolute; bottom: -30px; right: -30px; width: 150px; height: 150px;
+        background: rgba(255,255,255,0.05); border-radius: 30%; transform: rotate(45deg);
+    }
+
+    .h-line { width: 50px; height: 4px; background: #3b82f6; border-radius: 2px; margin-top: 10px; }
+
+    .hover-primary:hover { color: #3b82f6 !important; transform: translateX(-4px); }
+
+    /* Email maydoni uchun maxsus qo'shimcha */
+    .email-field-wrapper {
+        position: relative;
+    }
+
+    .email-field-wrapper input {
+        height: 65px !important; /* Bir oz balandroq qilish qulaylik uchun */
+        padding-left: 1.5rem !important;
+    }
+
+    /* Fokus bo'lganda orqa fonda juda mayin nur taratish */
+    .input-glow {
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: -1;
+    }
+
+    .custom-input input:focus ~ .input-glow {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    }
+
+    /* Label effektini boyitish */
+    .custom-input label {
+        transition: all 0.3s ease;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .custom-input input:focus + label {
+        color: #4F46E5 !important;
+    }
+
+    /* Xatolik xabari uchun */
+    .smallest {
+        font-size: 0.75rem;
+    }
+</style>
+
+<script>
+    // Rasm preview qilish va fayl nomini ko'rsatish
+    const avatarInput = document.querySelector('input[type="file"]');
+    const fileNameBox = document.getElementById('file-name');
+    const previewImg = document.getElementById('preview-image');
+
+    avatarInput.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(ex) {
+                if(previewImg) previewImg.src = ex.target.result;
+            }
+            reader.readAsDataURL(this.files[0]);
+            fileNameBox.innerHTML = '<i class="fas fa-file-signature me-2"></i> Tanlandi: ' + this.files[0].name;
+        }
+    });
+</script>
+{% endblock %}

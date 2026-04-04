@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} | DMS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4 animate__animated animate__fadeIn">
+        <ol class="breadcrumb custom-breadcrumb p-3 rounded-4 shadow-sm bg-white">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Fanlar</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'subject_lessons' lesson.subject.id %}">{{ lesson.subject.name }}</a>
+            </li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 250px;">{{ lesson.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8 animate__animated animate__fadeInLeft">
+
+            <div class="card shadow-premium border-0 overflow-hidden mb-4 rounded-5">
+                <div class="card-header bg-slate-900 d-flex justify-content-between align-items-center py-3 px-4">
+                    <h5 class="mb-0 fw-bold text-white"><i class="fas fa-play-circle text-primary me-2"></i> Video darslik</h5>
+                    <span class="badge bg-primary-soft text-primary rounded-pill">HD Sifat</span>
+                </div>
+                <div class="card-body p-0 bg-black">
+                    {% if lesson.video %}
+                        <div class="ratio ratio-16x9">
+                            <video id="lessonVideo" controls controlsList="nodownload" class="video-js-custom">
+                                <source src="{{ lesson.video.url }}" type="video/mp4">
+                                Brauzeringiz videoni qo'llab-quvvatlamaydi.
+                            </video>
+                        </div>
+                    {% else %}
+                        <div class="video-placeholder py-5 text-center bg-dark text-light opacity-75">
+                            <i class="fas fa-video-slash fa-4x mb-3 text-secondary"></i>
+                            <h5 class="fw-bold">Video material mavjud emas</h5>
+                            <p class="small">Ushbu dars faqat matnli konspektdan iborat.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-premium border-0 rounded-5 mb-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                        <div class="icon-box-sm bg-primary-soft text-primary">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h4 class="fw-black text-slate-900 mb-0">Dars konspekti</h4>
+                    </div>
+
+                    <div class="lesson-content-wrapper">
+                        <div class="lesson-text">
+                            {{ lesson.content|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 animate__animated animate__fadeInRight">
+
+            <div class="card shadow-premium border-0 rounded-5 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-slate-900 mb-4 border-bottom pb-2">O'quv materiallari</h6>
+
+                    {% if lesson.presentation %}
+                        <div class="d-grid mb-4">
+                            <a href="{{ lesson.presentation.url }}" class="btn btn-download-premium py-3 rounded-4" download>
+                                <span class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-file-powerpoint me-3 fa-lg"></i>
+                                    <div class="text-start">
+                                        <div class="fw-bold small lh-1">Prezentatsiya</div>
+                                        <div class="smallest opacity-75">Yuklab olish (PPTX)</div>
+                                    </div>
+                                </span>
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    <div class="meta-info-list">
+                        <div class="meta-item d-flex align-items-center p-3 rounded-4 bg-slate-50 mb-2">
+                            <div class="meta-icon me-3"><i class="fas fa-user-tie"></i></div>
+                            <div>
+                                <div class="smallest text-muted fw-bold text-uppercase">O'qituvchi</div>
+                                <div class="small fw-bold">{{ lesson.author.rank|default:"" }} {{ lesson.author.last_name }}</div>
+                            </div>
+                        </div>
+                        <div class="meta-item d-flex align-items-center p-3 rounded-4 bg-slate-50 mb-2">
+                            <div class="meta-icon me-3"><i class="fas fa-calendar-alt"></i></div>
+                            <div>
+                                <div class="smallest text-muted fw-bold text-uppercase">Sana</div>
+                                <div class="small fw-bold">{{ lesson.created_at|date:"d F, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="meta-item d-flex align-items-center p-3 rounded-4 bg-slate-50">
+                            <div class="meta-icon me-3"><i class="fas fa-building-columns"></i></div>
+                            <div>
+                                <div class="smallest text-muted fw-bold text-uppercase">Kafedra</div>
+                                <div class="small fw-bold">{{ lesson.subject.department.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-premium border-0 rounded-5 mb-4 {% if quiz and quiz.is_active %}bg-gradient-quiz-active{% else %}bg-gradient-quiz{% endif %} text-white overflow-hidden">
+                <div class="card-body p-4 text-center position-relative">
+                    <div class="quiz-overlay-icon"><i class="fas fa-vial"></i></div>
+                    <h5 class="fw-bold mb-2">Bilimingizni sinang</h5>
+                    <p class="small opacity-75 mb-4">Darsni to'liq o'zlashtirgan bo'lsangiz, test topshirib o'z natijangizni ko'ring.</p>
+
+                    {% if quiz and quiz.is_active %}
+                        <a href="{% url 'take_quiz' quiz.id %}" class="btn btn-light w-100 fw-bold py-3 rounded-4 shadow-sm animate__animated animate__pulse animate__infinite">
+                            <i class="fas fa-play me-2 text-primary"></i> Testni boshlash
+                        </a>
+                        <div class="mt-2 smallest opacity-75">
+                            <i class="far fa-clock me-1"></i> {{ quiz.duration }} minut |
+                            <i class="fas fa-star me-1"></i> {{ quiz.pass_percentage }}% o'tish bali
+                        </div>
+                    {% else %}
+                        <button class="btn btn-light w-100 fw-bold py-3 rounded-4 shadow-sm disabled opacity-50">
+                            <i class="fas fa-lock me-2"></i> Testni boshlash
+                        </button>
+                        <div class="mt-2 smallest opacity-50 text-uppercase tracking-wider">Tez kunda aktivlashadi</div>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="{% url 'subject_lessons' lesson.subject.id %}" class="btn btn-outline-slate w-100 py-3 rounded-4 fw-bold shadow-sm">
+                <i class="fas fa-arrow-left me-2"></i> Kurs darslariga qaytish
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* --- Styles & Colors --- */
+    :root {
+        --primary-indigo: #4F46E5;
+        --slate-900: #0f172a;
+        --slate-50: #f8fafc;
+    }
+
+
+
+    .fw-black { font-weight: 900; }
+    .smallest { font-size: 0.65rem; letter-spacing: 0.5px; }
+    .shadow-premium { box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08); }
+    .bg-primary-soft { background-color: rgba(79, 70, 229, 0.1); }
+    .bg-slate-900 { background-color: var(--slate-900); }
+
+    /* Breadcrumb */
+    .custom-breadcrumb { border: 1px solid #f1f5f9; }
+    .custom-breadcrumb .breadcrumb-item a { text-decoration: none; color: #64748b; font-weight: 600; transition: 0.3s; }
+    .custom-breadcrumb .breadcrumb-item a:hover { color: var(--primary-indigo); }
+
+    /* Lesson Content */
+    .lesson-content-wrapper { color: #334155; line-height: 1.8; font-size: 1.05rem; }
+    .lesson-text { padding: 10px; }
+
+    /* UI Elements */
+    .icon-box-sm { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .meta-icon { color: var(--primary-indigo); font-size: 1.1rem; opacity: 0.7; }
+
+    /* Buttons */
+    .btn-download-premium { background: #10b981; color: white; border: none; transition: 0.3s; }
+    .btn-download-premium:hover { background: #059669; color: white; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); }
+
+    .btn-outline-slate { border: 2px solid #e2e8f0; color: #475569; background: white; transition: 0.3s; }
+    .btn-outline-slate:hover { background: #f8fafc; border-color: #cbd5e1; color: #1e293b; }
+
+    /* Quiz Card */
+    .bg-gradient-quiz { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); }
+    .quiz-overlay-icon { position: absolute; top: -10px; right: -10px; font-size: 5rem; opacity: 0.1; transform: rotate(15deg); }
+
+    /* Faol holatdagi premium gradient */
+    .bg-gradient-quiz-active {
+        background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        transition: all 0.3s ease;
+    }
+
+    /* Yopiq holatdagi gradient (sizdagi mavjud rang) */
+    .bg-gradient-quiz {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        filter: grayscale(0.3);
+    }
+
+    .quiz-overlay-icon {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        font-size: 5rem;
+        opacity: 0.1;
+        transform: rotate(15deg);
+    }
+
+    .smallest {
+        font-size: 0.75rem;
+    }
+
+    /* Video styling */
+    video:focus { outline: none; }
+    .video-placeholder { min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+</style>
+{% endblock %}

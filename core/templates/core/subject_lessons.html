@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ subject.name }} darslari | DMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="row align-items-end mb-5 animate__animated animate__fadeIn">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb premium-breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Bosh sahifa</a></li>
+                    <li class="breadcrumb-item active">{{ subject.name }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="subject-icon-box bg-primary-gradient text-white">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <h1 class="fw-black text-slate-900 fs-3 mb-0 letter-spacing-tight">{{ subject.name }}</h1>
+            </div>
+            <p class="text-muted fs-0.5 mb-0 ms-1 opacity-75">Ushbu fan doirasida yuklangan barcha video va matnli o'quv materiallari</p>
+        </div>
+
+        {% if user.role != 'KURSANT' %}
+        <div class="col-md-4 text-md-end mt-4 mt-md-0">
+            <a href="{% url 'add_lesson' %}" class="btn btn-premium-add shadow-lg">
+                <i class="fas fa-plus-circle me-2 pulse-icon"></i> Yangi dars qo'shish
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <hr class="mb-5 opacity-10">
+
+    <div class="row g-4" id="lessonsGrid">
+        {% for lesson in lessons %}
+            <div class="col-md-6 col-lg-4 lesson-card-wrapper animate__animated animate__fadeInUp">
+                <div class="card h-100 border-0 shadow-premium-sm lesson-modern-card overflow-hidden">
+
+                    <div class="lesson-preview-box">
+                        <div class="ratio ratio-16x9 bg-slate-900 overflow-hidden">
+                            {% if lesson.video %}
+                                <video class="preview-video opacity-50" muted playsinline>
+                                    <source src="{{ lesson.video.url }}#t=0.5" type="video/mp4">
+                                </video>
+                            {% else %}
+                                <div class="no-video-placeholder">
+                                    <i class="fas fa-photo-film fa-2x opacity-25"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="preview-badges">
+                            <span class="badge-glass">
+                                <i class="far fa-calendar-alt me-1"></i> {{ lesson.created_at|date:"d.m.Y" }}
+                            </span>
+                        </div>
+
+                        <div class="play-overlay">
+                            <a href="{% url 'lesson_detail' lesson.id %}" class="play-circle-btn">
+                                <i class="fas fa-play"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 position-relative">
+                        <h5 class="fw-bold text-slate-900 mb-3 line-clamp-2">{{ lesson.title }}</h5>
+                        <p class="text-muted smallest fw-medium line-clamp-2 mb-4 opacity-75">
+                            {{ lesson.content|striptags|truncatewords:20|default:"Ushbu dars haqida qisqacha ma'lumot kiritilmagan." }}
+                        </p>
+
+                        <div class="d-flex align-items-center justify-content-between pt-3 border-top border-light">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="instructor-mini-circle">
+                                    <i class="fas fa-user-circle text-primary opacity-50"></i>
+                                </div>
+                                <div class="lh-1">
+                                    <div class="smallest text-muted fw-bold text-uppercase">O'qituvchi</div>
+                                    <div class="small fw-bold text-slate-800">{{ lesson.author.last_name }}</div>
+                                </div>
+                            </div>
+
+                            <a href="{% url 'lesson_detail' lesson.id %}" class="btn btn-lesson-go shadow-sm">
+                                Boshlash <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state-card p-5 glass-effect rounded-5 shadow-sm">
+                    <div class="empty-icon-box mb-4">
+                        <i class="fas fa-folder-closed fa-4x text-indigo opacity-25"></i>
+                    </div>
+                    <h3 class="fw-black text-slate-900">Hozircha darslar mavjud emas</h3>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 450px;">
+                        Ushbu fan bo'yicha o'quv materiallari hali yuklanmagan yoki sizning kafedrangiz uchun ruxsat berilmagan.
+                    </p>
+                    <a href="{% url 'home' %}" class="btn btn-outline-indigo px-5 rounded-pill fw-bold py-3">
+                        <i class="fas fa-house me-2"></i> Bosh sahifaga qaytish
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if is_paginated %}
+        <div class="pagination-wrapper mt-5 d-flex justify-content-center animate__animated animate__fadeInUp">
+            <nav aria-label="Lesson navigation">
+                <ul class="pagination premium-pagination gap-2">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link premium-link prev-next" href="?page={{ page_obj.previous_page_number }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link premium-link active-link shadow-sm">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link premium-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link premium-link prev-next" href="?page={{ page_obj.next_page_number }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+
+
+
+    /* --- Styles & Colors --- */
+    .fw-black { font-weight: 900; }
+    .letter-spacing-tight { letter-spacing: -1.2px; }
+    .smallest { font-size: 0.65rem; }
+    .bg-primary-gradient { background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%); }
+    .text-indigo { color: #4F46E5 !important; }
+
+    /* Breadcrumb UI */
+    .premium-breadcrumb { background: transparent; padding: 0; margin-bottom: 0; }
+    .premium-breadcrumb .breadcrumb-item a { text-decoration: none; color: #94a3b8; font-weight: 600; transition: 0.3s; }
+    .premium-breadcrumb .breadcrumb-item a:hover { color: #4F46E5; }
+    .premium-breadcrumb .breadcrumb-item.active { color: #1e293b; font-weight: 800; }
+
+    /* Subject Icon */
+    .subject-icon-box { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.3); }
+
+    /* Lesson Card Styling */
+    .lesson-modern-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 25px; }
+    .lesson-preview-box { position: relative; overflow: hidden; }
+    .preview-video { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .no-video-placeholder { height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8; }
+
+    /* Badges & Overlays */
+    .preview-badges { position: absolute; top: 15px; left: 15px; z-index: 5; }
+    .badge-glass { background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(8px); color: white; padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; border: 1px solid rgba(255,255,255,0.3); }
+
+    .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0); transition: 0.4s; z-index: 6; }
+    .play-circle-btn { width: 60px; height: 60px; background: white; color: #4F46E5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transform: scale(0.8); opacity: 0; transition: 0.4s; text-decoration: none; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+
+    /* Card Interaction */
+    .lesson-modern-card:hover { transform: translateY(-12px); box-shadow: 0 30px 60px -12px rgba(0,0,0,0.12) !important; }
+    .lesson-modern-card:hover .preview-video { transform: scale(1.1); opacity: 0.3; }
+    .lesson-modern-card:hover .play-overlay { background: rgba(15, 23, 42, 0.4); }
+    .lesson-modern-card:hover .play-circle-btn { transform: scale(1); opacity: 1; }
+
+    /* Buttons */
+    .btn-premium-add { background: var(--primary-gradient); color: white; padding: 12px 28px; border-radius: 50px; font-weight: 700; border: none; transition: 0.3s; }
+    .btn-premium-add:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(79, 70, 229, 0.4); color: white; }
+
+    .btn-lesson-go { background: #f8fafc; color: #4F46E5; border-radius: 12px; padding: 6px 15px; font-size: 0.8rem; font-weight: 800; border: 1px solid #e2e8f0; transition: 0.3s; }
+    .btn-lesson-go:hover { background: #4F46E5; color: white; border-color: #4F46E5; }
+
+    /* Utility */
+    .shadow-premium-sm { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    .instructor-mini-circle { width: 32px; height: 32px; background: #eef2ff; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+    .glass-effect { background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); border: 1px solid #f1f5f9; }
+
+
+    /* --- Premium Pagination Style --- */
+    .premium-pagination {
+        border: none;
+    }
+
+    .premium-link {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px !important; /* Card icon box bilan bir xil */
+        border: 1px solid #e2e8f0 !important;
+        background: white !important;
+        color: #64748b !important;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .premium-link:hover {
+        background: #f8fafc !important;
+        color: #4F46E5 !important;
+        border-color: #4F46E5 !important;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1);
+    }
+
+    .active-link {
+        background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%) !important; /* bg-primary-gradient bilan bir xil */
+        color: white !important;
+        border: none !important;
+        box-shadow: 0 8px 20px -5px rgba(79, 70, 229, 0.4) !important;
+    }
+
+    .prev-next {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+
+    .pagination-wrapper {
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+</style>
+{%endblock%}

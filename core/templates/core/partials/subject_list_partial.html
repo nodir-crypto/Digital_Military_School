@@ -1,0 +1,103 @@
+<div class="section-title-wrapper d-flex align-items-center gap-3 mb-4">
+    <h5 class="fw-black text-slate-900 mb-0">O'quv Fanlari</h5>
+    <div class="h-divider flex-grow-1 opacity-10"></div>
+    <span class="badge rounded-pill bg-white border text-slate-600 px-3 py-2 shadow-sm">
+        {% if is_paginated %}{{ page_obj.paginator.count }}{% else %}{{ subjects.count }}{% endif %} ta yo'nalish
+    </span>
+</div>
+
+<div class="row g-4" id="subjectsGrid">
+    {% for subject in subjects %}
+    <div class="col-md-6 col-xl-6 subject-card animate__animated animate__fadeInUp">
+        <div class="card h-100 border-0 shadow-premium-sm premium-glass-card">
+            <div class="card-banner-gradient" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+                <div class="banner-pattern"></div>
+                <div class="card-icon-wrapper shadow-lg">
+                    <i class="fas fa-book-open-reader"></i>
+                </div>
+                <div class="card-badge-top shadow-sm">
+                    <i class="fas fa-video me-1"></i> {{ subject.lessons.count }} dars
+                </div>
+            </div>
+
+            <div class="card-body p-4 pt-5">
+                <h4 class="fw-black text-slate-900 mb-2 card-title">{{ subject.name }}</h4>
+                <p class="text-muted small fw-medium mb-4 line-clamp-2">
+                    {{ subject.description|default:"Ushbu fan bo'yicha nazariy va amaliy videodarslar hamda topshiriqlar to'plami." }}
+                </p>
+
+                <div class="instructor-info-strip mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="mini-avatar-box">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="smallest text-muted fw-bold text-uppercase">Mas'ul Shaxs</div>
+                            <div class="small fw-bold text-slate-800 text-truncate">
+                                {% for inst in subject.instructors.all %}
+                                    {{ inst.last_name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Kafedra o'qituvchilari
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <a href="{% url 'subject_lessons' subject.id %}" class="btn btn-action-premium py-3">
+                        Kursga kirish <i class="fas fa-chevron-right ms-2 pulse-icon"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="empty-state-box p-5 rounded-5 border border-dashed">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="opacity-25 mb-3">
+            <h4 class="fw-black text-slate-400">Fanlar topilmadi</h4>
+            <p class="text-muted small">Qidiruv so'rovini o'zgartirib ko'ring.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if is_paginated %}
+    <div class="pagination-wrapper mt-5 animate__animated animate__fadeInUp" id="paginationContainer">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center gap-2">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link premium-page-link prev-next shadow-sm"
+                       href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link premium-page-link active-link shadow-sm">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link premium-page-link shadow-sm"
+                           href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link premium-page-link prev-next shadow-sm"
+                       href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endif %}

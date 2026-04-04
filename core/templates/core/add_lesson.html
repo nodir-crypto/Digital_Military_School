@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if edit_mode %}Darsni tahrirlash{% else %}Yangi dars qo'shish{% endif %} | DMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 profile-page-bg">
+    <div class="container">
+        <div class="row mb-5 animate__animated animate__fadeInDown">
+            <div class="col-lg-10 mx-auto">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb custom-breadcrumb p-2 px-4 shadow-sm">
+                        <li class="breadcrumb-item"><a href="{% url 'instructor_dashboard' %}"><i class="fas fa-th-large me-1"></i> Dashboard</a></li>
+                        <li class="breadcrumb-item active">{% if edit_mode %}Tahrirlash{% else %}Yangi dars yaratish{% endif %}</li>
+                    </ol>
+                </nav>
+                <div class="d-flex align-items-center gap-4 py-3">
+                    <div class="icon-circle-lg {% if edit_mode %}bg-warning{% else %}bg-primary{% endif %} shadow-lg">
+                        <i class="fas {% if edit_mode %}fa-pen-to-square{% else %}fa-plus{% endif %} text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="fw-black text-dark mb-1 letter-spacing-tight">
+                            {% if edit_mode %}Dars ma'lumotlarini o'zgartirish{% else %}Yangi o'quv darsini yaratish{% endif %}
+                        </h1>
+                        <p class="text-muted fw-medium mb-0">Kursantlar uchun interaktiv va mazmunli kontent tayyorlang.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-2xl glass-card overflow-hidden" style="border-radius: 35px;">
+                    <form method="POST" enctype="multipart/form-data" id="lessonForm" class="modern-form">
+                        {% csrf_token %}
+
+                        <div class="row g-0">
+                            <div class="col-md-7 p-4 p-lg-5 border-end border-light">
+                                <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                                    <span class="step-num me-3">1</span> Umumiy ma'lumotlar
+                                </h5>
+
+                                <div class="mb-4">
+                                    <label class="form-label custom-label">Mas'ul Fan</label>
+                                    <div class="input-group-modern shadow-sm">
+                                        <span class="input-icon"><i class="fas fa-university"></i></span>
+                                        {{ form.subject }}
+                                    </div>
+                                    {% if form.subject.errors %}<div class="text-danger smallest mt-2 fw-bold ms-3">{{ form.subject.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label custom-label">Dars mavzusi</label>
+                                    <div class="input-group-modern shadow-sm">
+                                        <span class="input-icon"><i class="fas fa-heading"></i></span>
+                                        {{ form.title }}
+                                    </div>
+                                    {% if form.title.errors %}<div class="text-danger smallest mt-2 fw-bold ms-3">{{ form.title.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label custom-label">Dars matni (Konspekt)</label>
+                                    <div class="content-editor-wrapper shadow-sm rounded-4 overflow-hidden">
+                                        {{ form.content }}
+                                    </div>
+                                    {% if form.content.errors %}<div class="text-danger smallest mt-2 fw-bold ms-3">{{ form.content.errors.0 }}</div>{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-5 p-4 p-lg-5 bg-light bg-opacity-30">
+                                <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                                    <span class="step-num me-3">2</span> Media va Auditoriya
+                                </h5>
+
+                                <div class="mb-4">
+                                    <label class="form-label custom-label">Video darslik (.mp4)</label>
+                                    <div class="custom-file-upload video-upload shadow-sm">
+                                        <i class="fas fa-video fa-2x mb-2 text-danger opacity-75"></i>
+                                        {{ form.video }}
+                                        <p class="mb-0 small text-muted">Maksimal: 100 MB</p>
+                                    </div>
+                                    {% if form.video.errors %}<div class="text-danger smallest mt-2 fw-bold">{{ form.video.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label custom-label">Taqdimot (.pdf, .pptx)</label>
+                                    <div class="custom-file-upload file-upload shadow-sm">
+                                        <i class="fas fa-file-powerpoint fa-2x mb-2 text-warning opacity-75"></i>
+                                        {{ form.presentation }}
+                                        <p class="mb-0 small text-muted">Maksimal: 10 MB</p>
+                                    </div>
+                                    {% if form.presentation.errors %}<div class="text-danger smallest mt-2 fw-bold">{{ form.presentation.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label custom-label">Auditoriya (Kafedralar)</label>
+                                    <div class="department-scroll-box shadow-sm bg-white p-3 border rounded-4" style="max-height: 250px; overflow-y: auto;">
+                                        <div class="row g-2">
+                                            {% for checkbox in form.target_departments %}
+                                                <div class="col-12">
+                                                    <div class="form-check modern-check p-2 rounded-3 border">
+                                                        {{ checkbox.tag }}
+                                                        <label class="form-check-label fw-bold small ms-2" for="{{ checkbox.id_for_label }}">
+                                                            {{ checkbox.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white p-4 p-lg-5 border-top border-light">
+                            <div class="d-flex flex-column flex-md-row justify-content-end gap-3">
+                                <a href="{% url 'instructor_dashboard' %}" class="btn btn-premium-cancel">
+                                    Bekor qilish
+                                </a>
+                                <button type="submit" class="btn btn-premium-submit px-5 shadow-primary-lg">
+                                    {% if edit_mode %}<i class="fas fa-check-circle me-2"></i> Saqlash{% else %}<i class="fas fa-paper-plane me-2"></i> E'lon qilish{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+    .profile-page-bg {
+        background-color: #f0f4f8;
+        background-image: radial-gradient(at 80% 20%, rgba(219, 234, 254, 0.4) 0px, transparent 50%),
+                          radial-gradient(at 20% 80%, rgba(238, 242, 255, 0.4) 0px, transparent 50%);
+        min-height: 100vh;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .fw-black { font-weight: 900; }
+    .letter-spacing-tight { letter-spacing: -1.5px; }
+    .shadow-2xl { box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.1); }
+    .smallest { font-size: 0.75rem; }
+
+    /* Breadcrumb */
+    .custom-breadcrumb {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        display: inline-flex;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    .custom-breadcrumb a { color: #64748b; text-decoration: none; }
+    .custom-breadcrumb .active { color: #4F46E5; }
+
+    /* Glass Card */
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.7); }
+
+    /* Icons and Steps */
+    .icon-circle-lg { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .step-num { width: 32px; height: 32px; background: #4F46E5; color: white; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+
+    /* Inputs */
+    .custom-label { font-weight: 800; color: #1e293b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: block; }
+
+    .input-group-modern { position: relative; display: flex; align-items: center; }
+    .input-icon { position: absolute; left: 1.2rem; color: #94a3b8; font-size: 1.1rem; z-index: 5; }
+
+    .input-group-modern select, .input-group-modern input {
+        width: 100%; padding: 15px 15px 15px 3.5rem !important;
+        border-radius: 18px !important; border: 2px solid #f1f5f9 !important;
+        background: #f8fafc !important; font-weight: 600; color: #1e293b;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .input-group-modern select:focus, .input-group-modern input:focus {
+        border-color: #4F46E5 !important; background: #fff !important;
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
+    }
+
+    /* Content Editor (Django default widget handling) */
+    .content-editor-wrapper textarea {
+        width: 100%; border: 2px solid #f1f5f9; background: #f8fafc;
+        border-radius: 18px; padding: 20px; font-family: inherit; min-height: 250px;
+    }
+
+    /* File Upload Boxes */
+    .custom-file-upload {
+        border: 2px dashed #cbd5e1; border-radius: 20px; padding: 25px;
+        text-align: center; background: #fff; transition: 0.3s; position: relative;
+    }
+    .custom-file-upload:hover { border-color: #4F46E5; background: #f0f7ff; }
+    .custom-file-upload input[type="file"] {
+        position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer;
+    }
+
+    /* Modern Checkbox */
+    .modern-check { transition: 0.2s; background: #fff; border-color: #f1f5f9 !important; }
+    .modern-check:hover { background: #f0f7ff; border-color: #4F46E5 !important; }
+    .modern-check input { width: 1.2rem; height: 1.2rem; accent-color: #4F46E5; cursor: pointer; }
+
+    /* Buttons */
+    .btn-premium-submit { background: linear-gradient(90deg, #4F46E5, #3B82F6); color: white; border-radius: 50px; padding: 15px 40px; font-weight: 800; border: none; transition: 0.3s; }
+    .btn-premium-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3); color: white; }
+
+    .btn-premium-cancel { background: #fff; color: #64748b; border: 2px solid #f1f5f9; border-radius: 50px; padding: 15px 40px; font-weight: 700; transition: 0.3s; }
+    .btn-premium-cancel:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+    /* Scrollbar */
+    .department-scroll-box::-webkit-scrollbar { width: 5px; }
+    .department-scroll-box::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
+
+<script>
+    document.getElementById('lessonForm').onsubmit = function() {
+        let btn = this.querySelector('button[type="submit"]');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Yuklanmoqda...';
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+        return true;
+    };
+
+    // Fayl tanlanganda ko'rsatish (video va presentation uchun)
+    document.querySelectorAll('input[type="file"]').forEach(input => {
+        input.addEventListener('change', function() {
+            let container = this.closest('.custom-file-upload');
+            if (this.files && this.files[0]) {
+                container.style.borderColor = "#10B981";
+                container.style.background = "#ecfdf5";
+                let text = container.querySelector('p');
+                text.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> ' + this.files[0].name;
+            }
+        });
+    });
+</script>
+{% endblock %}

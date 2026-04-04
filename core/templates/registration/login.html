@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kirish | DMS Intellektual Ta'lim{% endblock %}
+
+{% block content %}
+<div class="login-page-wrapper d-flex align-items-center justify-content-center min-vh-100">
+    <div class="login-bg-decor">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5 animate__animated animate__zoomIn">
+
+                <div class="card login-card border-0 shadow-premium">
+                    <div class="card-body p-4 p-md-5">
+
+                        <div class="text-center mb-5">
+                            <div class="login-icon-box mx-auto mb-4">
+                                <i class="fas fa-shield-halved text-white"></i>
+                            </div>
+                            <h3 class="fw-black text-slate-900 letter-spacing-tight mb-2">Xush kelibsiz!</h3>
+                            <p class="text-muted small fw-medium">DMS platformasiga kirish uchun ma'lumotlaringizni kiriting</p>
+                        </div>
+
+                        <form method="POST" autocomplete="off">
+                            {% csrf_token %}
+
+                            {% if form.errors or form.non_field_errors %}
+                                <div class="alert alert-premium-danger animate__animated animate__shakeX mb-4">
+                                    <i class="fas fa-circle-exclamation me-2"></i>
+                                    Login yoki parol noto'g'ri kiritildi!
+                                </div>
+                            {% endif %}
+
+                            <div class="form-group-premium mb-4">
+                                <label for="id_username" class="label-premium">Foydalanuvchi nomi</label>
+                                <div class="input-wrapper-premium">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input type="text" name="username" id="id_username"
+                                           class="form-control-premium"
+                                           placeholder="Username" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group-premium mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <label for="id_password" class="label-premium">Maxfiy parol</label>
+                                    <a href="#" class="forgot-link">Parolni unutdingizmi?</a>
+                                </div>
+                                <div class="input-wrapper-premium">
+                                    <i class="fas fa-key input-icon"></i>
+                                    <input type="password" name="password" id="id_password"
+                                           class="form-control-premium"
+                                           placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-4 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label small text-muted fw-medium" for="rememberMe">Meni eslab qol</label>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-login-premium py-3">
+                                    Tizimga kirish <i class="fas fa-arrow-right-to-bracket ms-2"></i>
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="small text-muted fw-medium">
+                                    Hisobingiz yo'qmi?
+                                    <a href="#" class="register-link ms-1">Ro'yxatdan o'tish</a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted smallest fw-bold text-uppercase opacity-50 letter-spacing-wide">
+                        &copy; 2026 DMS Academy <br>
+                        <span class="fw-medium">Axborot xavfsizligi markazi tomonidan himoyalangan</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* --- Styles & Themes --- */
+    :root {
+        --primary-indigo: #4F46E5;
+        --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+        --slate-900: #0f172a;
+        --slate-50: #f8fafc;
+    }
+
+    .fw-black { font-weight: 900; }
+    .letter-spacing-tight { letter-spacing: -1px; }
+    .letter-spacing-wide { letter-spacing: 1px; }
+    .smallest { font-size: 0.65rem; }
+
+    /* Login Page Wrapper */
+    .login-page-wrapper {
+        background-color: #f1f5f9;
+        position: relative;
+        overflow: hidden;
+<!--        margin-top: -85px; /* Navbar balandligini kompensatsiya qilish */-->
+    }
+
+    /* Background Decor */
+    .login-bg-decor .circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        z-index: 0;
+    }
+    .circle-1 { width: 300px; height: 300px; background: rgba(79, 70, 229, 0.1); top: -50px; right: -50px; }
+    .circle-2 { width: 250px; height: 250px; background: rgba(59, 130, 246, 0.1); bottom: -50px; left: -50px; }
+
+    /* Login Card */
+    .login-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 35px;
+        z-index: 1;
+        position: relative;
+    }
+    .shadow-premium { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
+
+    /* Icon Box */
+    .login-icon-box {
+        width: 70px; height: 70px;
+        background: var(--primary-gradient);
+        border-radius: 22px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Form Styles */
+    .label-premium {
+        font-size: 0.75rem; font-weight: 800;
+        color: #64748b; text-uppercase; margin-bottom: 8px; display: block;
+    }
+    .input-wrapper-premium { position: relative; }
+    .input-icon {
+        position: absolute; left: 18px; top: 50%;
+        transform: translateY(-50%); color: #94a3b8; font-size: 1rem;
+    }
+    .form-control-premium {
+        width: 100%; padding: 14px 14px 14px 50px;
+        background: #f1f5f9; border: 2px solid transparent;
+        border-radius: 18px; font-weight: 600; color: #1e293b;
+        transition: 0.3s;
+    }
+    .form-control-premium:focus {
+        outline: none; background: white; border-color: var(--primary-indigo);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Links & Buttons */
+    .forgot-link { font-size: 0.75rem; font-weight: 700; color: var(--primary-indigo); text-decoration: none; }
+    .forgot-link:hover { text-decoration: underline; }
+    .register-link { color: var(--primary-indigo); font-weight: 800; text-decoration: none; }
+
+    .btn-login-premium {
+        background: var(--primary-gradient); color: white;
+        border: none; border-radius: 18px; font-weight: 800;
+        transition: 0.3s; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+    }
+    .btn-login-premium:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.5); color: white; }
+
+    /* Alert Styling */
+    .alert-premium-danger {
+        background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2;
+        padding: 12px 18px; border-radius: 15px; font-size: 0.85rem; font-weight: 600;
+    }
+</style>
+{% endblock %}

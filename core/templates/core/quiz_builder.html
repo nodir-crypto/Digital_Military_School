@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <form method="POST" id="mainForm">
+        {% csrf_token %}
+        <input type="hidden" name="total_questions" id="totalQuestionsInput" value="0">
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+            <div class="card-header bg-primary p-4 text-white d-flex justify-content-between align-items-center border-0">
+                <div>
+                    <h3 class="fw-bold mb-1">Test Konstruktori</h3>
+                    <p class="mb-0 opacity-75">Dars: {{ lesson.title }}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if quiz %}
+                    <a href="{% url 'delete_quiz' lesson.id %}"
+                       class="btn btn-danger rounded-pill px-4 fw-bold border-0 shadow-sm"
+                       onclick="return confirm('DIQQAT! Ushbu darsdagi barcha savollar va test butunlay o\'chib ketadi. Rozimisiz?')">
+                        <i class="fas fa-trash-alt me-2"></i> TESTNI O'CHIRISH
+                    </a>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fas fa-save me-2"></i> SAQLASH
+                    </button>
+                </div>
+            </div>
+            <div class="card-body bg-light p-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="small fw-bold text-muted">Test sarlavhasi</label>
+                        <input type="text" name="quiz_title" value="{{ quiz.title|default:'' }}" class="form-control border-0 shadow-sm" placeholder="Test nomini kiriting..." required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="small fw-bold text-muted">Vaqt (minut)</label>
+                        <input type="number" name="duration" value="{{ quiz.duration|default:15 }}" class="form-control border-0 shadow-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="questionsContainer"></div>
+
+        <div class="text-center mt-4 mb-5">
+            <button type="button" class="btn btn-dark btn-lg rounded-pill px-5 shadow" onclick="addQuestion()">
+                <i class="fas fa-plus-circle me-2"></i> YANGI SAVOL QO'SHISH
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+let qCount = 0; // Bu global o'zgaruvchi savollarning tartib raqami uchun
+const existingData = {{ existing_questions_json|safe }};
+
+function updateQuestionIndices() {
+    // Bu funksiya serverga yuborilayotgan savollar sonini har doim yangilab turadi
+    document.getElementById('totalQuestionsInput').value = qCount;
+}
+
+function addQuestion(data = null) {
+    qCount++;
+    const container = document.getElementById('questionsContainer');
+    const div = document.createElement('div');
+    div.className = 'card border-0 shadow-sm rounded-4 mb-4 p-4 animate__animated animate__fadeIn';
+    div.id = `question_card_${qCount}`;
+
+    const qText = data ? data.text : '';
+    const qDiff = data ? data.difficulty : 'MEDIUM';
+    const qExpl = data ? data.explanation : '';
+
+    div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold small">Savol #${qCount}</span>
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" onclick="removeQuestion(this)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="mb-3">
+            <textarea name="q_text_${qCount}" class="form-control border-0 bg-light p-3" rows="2" placeholder="Savol matnini kiriting..." required>${qText}</textarea>
+        </div>
+
+        <div class="row g-3 mb-3">
+            ${['a','b','c','d'].map((l, i) => {
+                const choiceText = data && data.choices[i] ? data.choices[i].text : '';
+                const isCorrect = data && data.choices[i] ? data.choices[i].is_correct : (l === 'a');
+                return `
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-0 shadow-sm">
+                            <input type="radio" name="q_${qCount}_correct" value="${l}" ${isCorrect ? 'checked' : ''} class="form-check-input">
+                        </span>
+                        <input type="text" name="q_${qCount}_choice_${l}" value="${choiceText}" class="form-control border-0 shadow-sm" placeholder="Variant ${l.toUpperCase()}" required>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>
+
+        <div class="row align-items-center">
+            <div class="col-md-9">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-transparent border-0"><i class="fas fa-info-circle text-muted"></i></span>
+                    <input type="text" name="explanation_${qCount}" value="${qExpl}" class="form-control border-0 bg-light" placeholder="To'g'ri javob uchun izoh (ixtiyoriy)">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="difficulty_${qCount}" class="form-select form-select-sm border-0 bg-light fw-bold text-muted">
+                    <option value="EASY" ${qDiff==='EASY'?'selected':''}>Oson</option>
+                    <option value="MEDIUM" ${qDiff==='MEDIUM'?'selected':''}>O'rtacha</option>
+                    <option value="HARD" ${qDiff==='HARD'?'selected':''}>Qiyin</option>
+                </select>
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+    updateQuestionIndices();
+}
+
+function removeQuestion(btn) {
+    if(confirm("Ushbu savolni o'chirishni tasdiqlaysizmi?")) {
+        const card = btn.closest('.card');
+        card.classList.add('animate__fadeOut');
+        setTimeout(() => {
+            card.remove();
+            // Eslatma: qCount ni kamaytirmaymiz, chunki input nomlari tartibi buziladi.
+            // Serverda name="q_text_1" kabi kelgan ma'lumotlarni tekshirib olamiz.
+        }, 300);
+    }
+}
+
+window.onload = () => {
+    if (existingData && existingData.length > 0) {
+        existingData.forEach(item => addQuestion(item));
+    } else {
+        addQuestion();
+    }
+};
+</script>
+
+<style>
+    .bg-primary { background: linear-gradient(135deg, #4f46e5, #3b82f6) !important; }
+    .btn-dark { background: #1e293b !important; }
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.1);
+        border: 1px solid #4f46e5 !important;
+    }
+    .input-group-text { border-radius: 0.5rem 0 0 0.5rem !important; }
+    .input-group .form-control { border-radius: 0 0.5rem 0.5rem 0 !important; }
+    .animate__animated { --animate-duration: 0.4s; }
+</style>
+{% endblock %}

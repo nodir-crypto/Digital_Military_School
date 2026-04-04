@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Boshqaruv paneli | DMS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 profile-page-bg">
+    <div class="container">
+        <div class="row mb-5 align-items-center animate__animated animate__fadeIn">
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <span class="badge-premium primary smallest">O'qituvchi nazorati</span>
+                    <span class="text-muted small fw-bold"><i class="fas fa-calendar-day me-1"></i> {% now "d-F, Y" %}</span>
+                </div>
+                <h1 class="display-6 fw-black text-slate-900 letter-spacing-tight">Boshqaruv paneli</h1>
+                <p class="text-muted fw-medium">O'quv jarayonini monitoring qiling va materiallarni boshqaring.</p>
+            </div>
+            <div class="col-md-5 text-md-end">
+                <a href="{% url 'add_lesson' %}" class="btn btn-premium-submit px-4 py-3 shadow-primary-lg">
+                    <i class="fas fa-plus-circle me-2"></i> Yangi dars yuklash
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card blue">
+                    <div class="stat-icon shadow-sm"><i class="fas fa-clapperboard"></i></div>
+                    <div class="stat-info">
+                        <h2 class="fw-black mb-0">{{ lessons.count }}</h2>
+                        <p class="smallest fw-bold text-uppercase opacity-75">Jami darslar</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card purple">
+                    <div class="stat-icon shadow-sm"><i class="fas fa-book-bookmark"></i></div>
+                    <div class="stat-info">
+                        <h2 class="fw-black mb-0">{{ teacher_subjects.count }}</h2>
+                        <p class="smallest fw-bold text-uppercase opacity-75">Mas'ul fanlar</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card cyan">
+                    <div class="stat-icon shadow-sm"><i class="fas fa-landmark-flag"></i></div>
+                    <div class="stat-info">
+                        <h2 class="fw-black mb-0 text-truncate" style="max-width: 150px;">{% firstof user.department.name "IT" %}</h2>
+                        <p class="smallest fw-bold text-uppercase opacity-75">Kafedra</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-2xl glass-card overflow-hidden" style="border-radius: 35px;">
+            <div class="card-header bg-white bg-opacity-50 border-0 p-4">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-6">
+                        <h4 class="fw-black text-slate-800 mb-0">Mening darslarim</h4>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <form method="GET" class="d-inline-block">
+                            <div class="filter-search-wrapper shadow-sm">
+                                <i class="fas fa-filter text-indigo"></i>
+                                <select name="subject_filter" class="filter-select" onchange="this.form.submit()">
+                                    <option value="">Barcha fanlar</option>
+                                    {% for subj in teacher_subjects %}
+                                        <option value="{{ subj.id }}" {% if selected_subject_id == subj.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ subj.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </form>
+                        {% if selected_subject_id %}
+                            <a href="{% url 'instructor_dashboard' %}" class="btn-clear-filter d-inline-flex ms-2" title="Tozalash">
+                                <i class="fas fa-rotate-left"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 custom-premium-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Dars va Mavzu</th>
+                            <th>O'quv Fani</th>
+                            <th>Sana</th>
+                            <th>Test Holati</th>
+                            <th class="text-end pe-4">Boshqaruv</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in lessons %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="lesson-icon-box me-3 shadow-sm bg-light-indigo">
+                                        <i class="fas fa-book-open text-indigo"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-slate-900 mb-0">{{ lesson.title }}</div>
+                                        <div class="smallest text-muted fw-bold">ID: #{{ lesson.id|add:1000 }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-subject px-3 py-2 rounded-pill bg-soft-primary text-primary small fw-bold">
+                                    {{ lesson.subject.name }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="small fw-bold text-slate-800">{{ lesson.created_at|date:"d.m.Y" }}</span>
+                                    <span class="smallest text-muted">{{ lesson.created_at|time:"H:i" }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% if lesson.quiz %}
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="status-indicator bg-success shadow-success-sm"></div>
+                                        <div class="d-flex flex-column">
+                                            <span class="small fw-bold text-success">Test Mavjud</span>
+                                            <span class="smallest text-muted">{{ lesson.quiz.questions.count }} ta savol</span>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="d-flex align-items-center gap-2 text-muted opacity-75">
+                                        <div class="status-indicator bg-secondary"></div>
+                                        <span class="small fw-bold">Test qo'shilmagan</span>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="action-btn-group d-flex justify-content-end gap-2">
+                                    <a href="{% url 'lesson_detail' lesson.id %}" class="btn-action view shadow-sm" title="Ko'rish">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                    <a href="{% url 'quiz_builder' lesson.id %}"
+                                       class="btn-action {% if lesson.quiz %}quiz-edit{% else %}quiz-add{% endif %} shadow-sm"
+                                       title="{% if lesson.quiz %}Testni tahrirlash{% else %}Test yaratish{% endif %}">
+                                        <i class="fas {% if lesson.quiz %}fa-tasks{% else %}fa-plus-circle{% endif %}"></i>
+                                    </a>
+
+                                    <a href="{% url 'edit_lesson' lesson.id %}" class="btn-action edit shadow-sm" title="Tahrirlash">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+
+                                    <button type="button" class="btn-action delete shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ lesson.id }}" title="O'chirish">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="deleteModal{{ lesson.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content border-0 shadow-lg" style="border-radius: 35px;">
+                                    <div class="modal-body p-5 text-center">
+                                        <div class="delete-icon-wrapper mb-4 mx-auto">
+                                            <div class="pulse-danger"></div>
+                                            <i class="fas fa-trash-can text-danger fa-2x"></i>
+                                        </div>
+                                        <h3 class="fw-black text-slate-900 mb-2">Tasdiqlang</h3>
+                                        <p class="text-muted px-4 mb-4">"<strong>{{ lesson.title }}</strong>" darsini o'chirishga aminmisiz?</p>
+                                        <div class="d-flex gap-3 justify-content-center">
+                                            <button type="button" class="btn btn-light rounded-pill px-4 py-3 fw-bold text-muted flex-grow-1" data-bs-dismiss="modal">Qolish</button>
+                                            <form action="{% url 'delete_lesson' lesson.id %}" method="POST" class="flex-grow-1">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger rounded-pill px-4 py-3 fw-bold w-100 shadow-danger-sm">O'chirilsin</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="empty-state py-5">
+                                    <i class="fas fa-folder-open text-muted fa-3x mb-3 opacity-25"></i>
+                                    <h5 class="fw-bold text-slate-700">Darslar topilmadi</h5>
+                                    <a href="{% url 'add_lesson' %}" class="btn btn-indigo-soft rounded-pill px-4 mt-2 fw-bold text-indigo">Yangi dars qo'shish</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+    /* Baza va Shriftlar */
+    .profile-page-bg { background-color: #f8fafc; min-height: 100vh; font-family: 'Inter', sans-serif; }
+    .fw-black { font-weight: 900; }
+    .letter-spacing-tight { letter-spacing: -1.5px; }
+    .text-indigo { color: #4F46E5 !important; }
+
+    /* Stat Cards */
+    .stat-card { padding: 30px; border-radius: 35px; color: white; position: relative; overflow: hidden; display: flex; align-items: center; gap: 20px; transition: 0.3s; }
+    .stat-card.blue { background: linear-gradient(135deg, #4F46E5, #3B82F6); }
+    .stat-card.purple { background: linear-gradient(135deg, #7C3AED, #A855F7); }
+    .stat-card.cyan { background: linear-gradient(135deg, #0891B2, #06B6D4); }
+    .stat-icon { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+    /* Table Styling */
+    .custom-premium-table thead th { background: #f8fafc; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; padding: 20px 10px; border: none; }
+    .lesson-icon-box { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .badge-subject { background: #f1f5f9; color: #4F46E5; }
+
+    /* Action Buttons (Asosiy professional qism) */
+    .btn-action { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; transition: 0.3s; border: none; background: #fff; }
+    .btn-action.view { color: #4F46E5; background: #f0f4ff; }
+    .btn-action.edit { color: #f59e0b; background: #fff9eb; }
+    .btn-action.delete { color: #ef4444; background: #fff1f2; }
+    .btn-action.quiz-add { color: #22c55e; background: #f0fdf4; }
+    .btn-action.quiz-edit { color: #059669; background: #ecfdf5; border: 1px dashed #059669; }
+
+    .btn-action:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+    /* Indicators */
+    .status-indicator { width: 10px; height: 10px; border-radius: 50%; }
+    .shadow-success-sm { box-shadow: 0 0 10px rgba(34, 197, 94, 0.4); }
+
+    /* Premium UI */
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.7); }
+    .filter-search-wrapper { background: #fff; padding: 10px 20px; border-radius: 50px; display: flex; align-items: center; gap: 10px; border: 1px solid #e2e8f0; }
+    .filter-select { border: none; font-weight: 700; font-size: 0.85rem; outline: none; background: transparent; }
+    .btn-premium-submit { background: linear-gradient(90deg, #4F46E5, #3B82F6); color: white; border-radius: 20px; font-weight: 800; border: none; transition: 0.3s; }
+
+    /* Delete Modal UI */
+    .delete-icon-wrapper { width: 80px; height: 80px; background: #fef2f2; border-radius: 25px; display: flex; align-items: center; justify-content: center; position: relative; }
+    .pulse-danger { position: absolute; inset: 0; background: #ef4444; opacity: 0.1; border-radius: 25px; animation: pulse-red 2s infinite; }
+    @keyframes pulse-red { 0% { transform: scale(1); opacity: 0.2; } 100% { transform: scale(1.4); opacity: 0; } }
+</style>
+{% endblock %}
