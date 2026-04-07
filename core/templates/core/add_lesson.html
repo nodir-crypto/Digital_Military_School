@@ -94,20 +94,27 @@
 
                                 <div class="mb-0">
                                     <label class="form-label custom-label">Auditoriya (Kafedralar)</label>
-                                    <div class="department-scroll-box shadow-sm bg-white p-3 border rounded-4" style="max-height: 250px; overflow-y: auto;">
-                                        <div class="row g-2">
-                                            {% for checkbox in form.target_departments %}
-                                                <div class="col-12">
-                                                    <div class="form-check modern-check p-2 rounded-3 border">
-                                                        {{ checkbox.tag }}
-                                                        <label class="form-check-label fw-bold small ms-2" for="{{ checkbox.id_for_label }}">
-                                                            {{ checkbox.choice_label }}
-                                                        </label>
+                                    <div id="department-wrapper" class="department-scroll-box shadow-sm bg-white p-3 border rounded-4" style="max-height: 250px; overflow-y: auto; min-height: 100px;">
+                                        <div class="row g-2" id="department-list">
+                                            {% if edit_mode %}
+                                                {% for checkbox in form.target_departments %}
+                                                    <div class="col-12">
+                                                        <div class="form-check modern-check p-2 rounded-3 border">
+                                                            {{ checkbox.tag }}
+                                                            <label class="form-check-label fw-bold small ms-2" for="{{ checkbox.id_for_label }}">
+                                                                {{ checkbox.choice_label }}
+                                                            </label>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            {% endfor %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <p class="text-muted small text-center my-4 w-100" id="placeholder-text">
+                                                    <i class="fas fa-info-circle me-1"></i> Avval fanni tanlang...
+                                                </p>
+                                            {% endif %}
                                         </div>
                                     </div>
+                                    {% if form.target_departments.errors %}<div class="text-danger smallest mt-2 fw-bold">{{ form.target_departments.errors.0 }}</div>{% endif %}
                                 </div>
                             </div>
                         </div>
@@ -181,7 +188,7 @@
         box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1) !important;
     }
 
-    /* Content Editor (Django default widget handling) */
+    /* Content Editor */
     .content-editor-wrapper textarea {
         width: 100%; border: 2px solid #f1f5f9; background: #f8fafc;
         border-radius: 18px; padding: 20px; font-family: inherit; min-height: 250px;
@@ -198,7 +205,7 @@
     }
 
     /* Modern Checkbox */
-    .modern-check { transition: 0.2s; background: #fff; border-color: #f1f5f9 !important; }
+    .modern-check { transition: 0.2s; background: #fff; border-color: #f1f5f9 !important; margin-bottom: 8px; }
     .modern-check:hover { background: #f0f7ff; border-color: #4F46E5 !important; }
     .modern-check input { width: 1.2rem; height: 1.2rem; accent-color: #4F46E5; cursor: pointer; }
 
@@ -215,24 +222,73 @@
 </style>
 
 <script>
-    document.getElementById('lessonForm').onsubmit = function() {
-        let btn = this.querySelector('button[type="submit"]');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Yuklanmoqda...';
-        btn.style.opacity = '0.7';
-        btn.style.pointerEvents = 'none';
-        return true;
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        const subjectSelect = document.querySelector('select[name="subject"]');
+        const deptList = document.getElementById('department-list');
+        const lessonForm = document.getElementById('lessonForm');
 
-    // Fayl tanlanganda ko'rsatish (video va presentation uchun)
-    document.querySelectorAll('input[type="file"]').forEach(input => {
-        input.addEventListener('change', function() {
-            let container = this.closest('.custom-file-upload');
-            if (this.files && this.files[0]) {
-                container.style.borderColor = "#10B981";
-                container.style.background = "#ecfdf5";
-                let text = container.querySelector('p');
-                text.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> ' + this.files[0].name;
-            }
+        // Fan tanlanganda kafedralarni yuklash (Professional AJAX)
+        if (subjectSelect) {
+            subjectSelect.addEventListener('change', function() {
+                const subjectId = this.value;
+
+                if (!subjectId) {
+                    deptList.innerHTML = '<p class="text-muted small text-center my-4 w-100">Avval fanni tanlang...</p>';
+                    return;
+                }
+
+                // Yuklanish animatsiyasi
+                deptList.innerHTML = '<div class="text-center w-100 py-4"><span class="spinner-border spinner-border-sm text-primary"></span> Yuklanmoqda...</div>';
+
+                fetch(`/ajax/get-departments/?subject_id=${subjectId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        deptList.innerHTML = '';
+                        if (data.departments.length === 0) {
+                            deptList.innerHTML = '<p class="text-danger small p-2 w-100 text-center">Sizga dars berish uchun kafedra biriktirilmagan.</p>';
+                            return;
+                        }
+
+                        data.departments.forEach(dept => {
+                            const div = document.createElement('div');
+                            div.className = 'col-12 animate__animated animate__fadeIn';
+                            div.innerHTML = `
+                                <div class="form-check modern-check p-2 rounded-3 border">
+                                    <input class="form-check-input ms-0" type="checkbox" name="target_departments" value="${dept.id}" id="dept_${dept.id}">
+                                    <label class="form-check-label fw-bold small ms-2" for="dept_${dept.id}">
+                                        ${dept.name}
+                                    </label>
+                                </div>
+                            `;
+                            deptList.appendChild(div);
+                        });
+                    })
+                    .catch(error => {
+                        deptList.innerHTML = '<p class="text-danger small text-center w-100">Xatolik yuz berdi.</p>';
+                    });
+            });
+        }
+
+        // Formani yuborishda animatsiya
+        lessonForm.onsubmit = function() {
+            let btn = this.querySelector('button[type="submit"]');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Yuklanmoqda...';
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+            return true;
+        };
+
+        // Fayl tanlanganda ko'rsatish
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                let container = this.closest('.custom-file-upload');
+                if (this.files && this.files[0]) {
+                    container.style.borderColor = "#10B981";
+                    container.style.background = "#ecfdf5";
+                    let text = container.querySelector('p');
+                    text.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> ' + this.files[0].name;
+                }
+            });
         });
     });
 </script>

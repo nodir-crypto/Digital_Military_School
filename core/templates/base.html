@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}HM | Intellektual Ta'lim{% endblock %}</title>
+    <title>{% block title %}DMS | Intellektual Ta'lim Tizimi{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,317 +17,232 @@
             --glass-bg: rgba(255, 255, 255, 0.85);
             --slate-900: #0f172a;
             --slate-600: #475569;
-            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --accent-soft: rgba(79, 70, 229, 0.08);
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #f1f5f9;
-            background-image:
-                radial-gradient(at 0% 0%, rgba(79, 70, 225, 0.03) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.03) 0px, transparent 50%);
+            background-color: #f8fafc;
             color: var(--slate-900);
-            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- MODERN NAVBAR --- */
+        /* --- MODERN GLASS NAVBAR --- */
         .navbar {
             background: var(--glass-bg);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 15px 0;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 12px 0;
+            transition: all 0.4s ease;
+            z-index: 1050;
         }
 
         .navbar.scrolled {
-            padding: 10px 0;
+            padding: 8px 0;
             box-shadow: 0 10px 30px -10px rgba(0,0,0,0.08);
         }
 
-        .navbar-brand {
-            font-weight: 800;
-            font-size: 1.5rem;
-            color: var(--slate-900);
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-        }
-
         .brand-logo-box {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             background: var(--primary-gradient);
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 12px;
             box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
+            transition: 0.3s;
         }
 
-        .nav-link {
-            font-weight: 600;
-            font-size: 0.9rem;
+        .navbar-brand:hover .brand-logo-box { transform: rotate(-10deg) scale(1.1); }
+        .brand-text { font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; color: var(--slate-900); margin-left: 10px; }
+
+        /* --- NAVIGATION PILLS --- */
+        .modern-nav-pill .nav-link {
+            font-weight: 700;
+            font-size: 0.85rem;
             color: var(--slate-600) !important;
             padding: 10px 18px !important;
             border-radius: 14px;
-            transition: 0.3s;
-            margin: 0 4px;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 2px;
+        }
+
+        .modern-nav-pill .nav-link:hover {
+            background: var(--accent-soft);
+            color: var(--primary-indigo) !important;
+        }
+
+        /* Yaqqol bilinib turuvchi ACTIVE holati */
+        .modern-nav-pill .nav-link.active {
+            background: white !important;
+            color: var(--primary-indigo) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             position: relative;
         }
 
-        .nav-link:hover {
-            color: var(--primary-indigo) !important;
-            background: rgba(79, 70, 229, 0.04);
+        .modern-nav-pill .nav-link.active::after {
+            content: ""; position: absolute; bottom: 0; left: 20%; right: 20%; height: 3px;
+            background: var(--primary-indigo); border-radius: 10px 10px 0 0;
         }
 
-        /* Dinamik Active holati uchun stil */
-        .nav-link.active {
-            color: var(--primary-indigo) !important;
-            background: rgba(79, 70, 229, 0.08) !important;
-        }
-
-        .nav-link.active::after {
-            content: "";
-            position: absolute;
-            bottom: 6px;
-            left: 25%;
-            right: 25%;
-            height: 3px;
-            background: var(--primary-indigo);
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
-        }
-
-        /* --- USER DROPDOWN --- */
-        .user-nav-box {
+        /* --- USER PROFILE DROPDOWN --- */
+        .user-trigger {
             background: #fff;
             border: 1px solid #e2e8f0;
-            border-radius: 50px;
+            border-radius: 100px;
             padding: 5px 5px 5px 15px;
-            transition: 0.3s;
-        }
-        .user-nav-box:hover {
-            border-color: var(--primary-indigo);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        }
-
-        .user-avatar {
-            width: 38px;
-            height: 38px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            box-shadow: 0 0 0 2px var(--primary-indigo);
-        }
-
-        .dropdown-menu {
-            border-radius: 20px;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12);
-            padding: 12px;
-            margin-top: 15px !important;
-            animation: fadeInDown 0.3s ease;
-        }
-
-        .dropdown-item {
-            border-radius: 12px;
-            padding: 10px 15px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--slate-600);
-            transition: 0.2s;
-        }
-
-        .dropdown-item i { width: 20px; color: var(--primary-indigo); }
-
-        .dropdown-item:hover {
-            background: var(--slate-50);
-            color: var(--primary-indigo);
-            transform: translateX(5px);
-        }
-
-        /* --- FLASH MESSAGES --- */
-        .alert-wrapper {
-            position: fixed;
-            top: 90px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 320px;
-        }
-
-        .alert-premium {
-            background: white;
-            border: none;
-            border-left: 5px solid;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1);
-            color: var(--slate-900);
-            font-weight: 600;
+            text-decoration: none !important;
             display: flex;
             align-items: center;
+            gap: 12px;
+            transition: 0.3s;
         }
+
+        .user-trigger:hover { border-color: var(--primary-indigo); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 0 0 2px var(--primary-indigo); }
+
+        .role-badge { font-size: 0.65rem; font-weight: 800; background: var(--primary-indigo); color: white; padding: 2px 8px; border-radius: 50px; text-transform: uppercase; }
+
+        /* --- FLASH MESSAGES --- */
+        .alert-wrapper { position: fixed; top: 90px; right: 20px; z-index: 9999; min-width: 320px; }
+        .alert-premium { background: white; border: none; border-left: 5px solid; border-radius: 15px; box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1); color: var(--slate-900); font-weight: 600; }
+
+        /* --- MAIN CONTENT --- */
+        main { flex: 1; padding-top: 20px; }
 
         /* --- FOOTER --- */
-        .footer {
-            background: #fff;
-            padding: 40px 0;
-            border-top: 1px solid #e2e8f0;
-            margin-top: 80px;
-        }
+        .footer { background: #fff; padding: 40px 0; border-top: 1px solid #e2e8f0; margin-top: auto; }
 
-        .footer-logo {
-            font-weight: 800;
-            color: var(--slate-900);
-            text-decoration: none;
-            font-size: 1.2rem;
-        }
-
-        .btn-primary-premium {
-            background: var(--primary-gradient);
-            border: none;
-            padding: 10px 25px;
-            border-radius: 50px;
-            font-weight: 700;
-            color: white;
-            transition: 0.3s;
-            box-shadow: 0 8px 20px -6px rgba(79, 70, 229, 0.4);
-        }
-
-        .btn-primary-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px -6px rgba(79, 70, 229, 0.5);
-            color: white;
-        }
-
-        .role-badge-pill {
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 50px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Scrollbar */
+        /* --- SCROLLBAR --- */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--slate-50); }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @media (max-width: 991px) {
+            .modern-nav-pill { padding: 20px 0; }
+            .user-trigger { margin-top: 15px; width: 100%; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-expand-lg sticky-top" id="mainNavbar">
         <div class="container">
-            <a class="navbar-brand animate__animated animate__fadeIn" href="{% url 'home' %}">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
                 <div class="brand-logo-box">
                     <i class="fas fa-graduation-cap text-white"></i>
                 </div>
-                <span>DMS</span>
+                <span class="brand-text">DMS<span class="text-primary">.</span></span>
             </a>
 
             <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <i class="fas fa-bars-staggered text-primary"></i>
+                <i class="fas fa-bars-staggered text-primary fs-3"></i>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    {%if not user.is_staff and not user.role == 'INSTRUCTOR' %}
+                <ul class="navbar-nav mx-auto modern-nav-pill">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
-                           href="{% url 'home' %}">Bosh sahifa</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="fas fa-th-large"></i> <span>Dashboard</span>
+                        </a>
                     </li>
-                    {%endif%}
-                   {% if not user.is_staff and not user.is_superuser and not user.role == 'INSTRUCTOR' %}
-                        <li class="nav-item ms-lg-2">
-                            <a class="nav-link d-flex align-items-center py-2 px-3 rounded-pill {% if request.resolver_match.url_name == 'student_analytics' %}bg-primary text-white active{% else %}text-slate-600 hover-bg-light{% endif %}"
-                               href="{% url 'student_analytics' %}">
-                                <i class="fas fa-chart-pie me-2"></i>
-                                <span class="fw-bold smallest text-uppercase">STATISTIKA</span>
-                            </a>
-                        </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'resource_hub' %}active{% endif %}" href="{% url 'resource_hub' %}">
+                            <i class="fas fa-book-open"></i> <span>Kutubxona</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'ranking_view' %}active{% endif %}" href="{% url 'ranking_view' %}">
+                            <i class="fas fa-trophy text-warning"></i> <span>Reyting</span>
+                        </a>
+                    </li>
+
+                    {% if user.role == 'KURSANT' %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'student_analytics' %}active{% endif %}" href="{% url 'student_analytics' %}">
+                            <i class="fas fa-chart-line text-success"></i> <span>Statistika</span>
+                        </a>
+                    </li>
                     {% endif %}
 
-                   <a class="nav-link ranking-nav-link d-flex align-items-center py-2 px-3 rounded-pill" href="{% url 'ranking_view' %}">
-                        <div class="ranking-icon-wrapper me-2">
-                            <i class="fas fa-trophy text-warning"></i>
-                        </div>
-                        <div class="d-flex flex-column">
-                            <span class="fw-black smallest text-uppercase lh-1">Reyting</span>
-                            {% if user_rank %}
-                                <span class="text-muted" style="font-size: 10px;">
-                                    #{{ user_rank }} / {{ total_students }} o'rin
-                                </span>
-                            {% else %}
-                                <span class="text-muted" style="font-size: 10px;">Reytingda yo'qsiz</span>
-                            {% endif %}
-                        </div>
-                    </a>
-
                     {% if user.role == 'INSTRUCTOR' or user.role == 'COMMANDER' %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'instructor_dashboard' %}active{% endif %}"
-                           href="{% url 'instructor_dashboard' %}">Boshqaruv</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-layer-group text-danger"></i> <span>Boshqaruv</span>
+                        </a>
+                        <ul class="dropdown-menu border-0 shadow-lg animate__animated animate__fadeInUp">
+                            <li><a class="dropdown-item fw-bold py-2" href="{% url 'instructor_dashboard' %}"><i class="fas fa-gauge-high me-2 text-primary"></i>Panel</a></li>
+                            <li><a class="dropdown-item fw-bold py-2" href="{% url 'add_lesson' %}"><i class="fas fa-plus-circle me-2 text-success"></i>Dars yuklash</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'add_lesson' %}active{% endif %}"
-                           href="{% url 'add_lesson' %}">Dars yuklash</a>
-                    </li>
-
                     {% endif %}
                 </ul>
 
                 <div class="d-flex align-items-center">
                     {% if user.is_authenticated %}
                         <div class="dropdown">
-                            <a class="text-decoration-none d-flex align-items-center user-nav-box dropdown-toggle shadow-none" href="#" data-bs-toggle="dropdown">
-                                <div class="text-end me-3 d-none d-lg-block">
+                            <a class="user-trigger dropdown-toggle shadow-none" href="#" data-bs-toggle="dropdown">
+                                <div class="text-end d-none d-xl-block">
                                     <div class="small fw-bold text-dark lh-1">{{ user.first_name|default:user.username }}</div>
-                                    <span class="role-badge-pill bg-primary text-white">{{ user.get_role_display }}</span>
+                                    <span class="role-badge">{{ user.get_role_display }}</span>
                                 </div>
-                                {% if user.avatar %}
-                                    <img src="{{ user.avatar.url }}" class="user-avatar" alt="User">
-                                {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4F46E5&color=fff&bold=true" class="user-avatar" alt="User">
-                                {% endif %}
+                                <div class="position-relative">
+                                    {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" class="user-avatar" alt="User">
+                                    {% else %}
+                                        <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=4F46E5&color=fff&bold=true" class="user-avatar" alt="User">
+                                    {% endif %}
+                                </div>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0">
-                                <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-id-card-alt me-2"></i> Shaxsiy profil</a></li>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-3 p-2">
+                                <li><a class="dropdown-item rounded-3 py-2" href="{% url 'profile' %}"><i class="fas fa-user-circle me-2 text-primary"></i> Profil</a></li>
                                 {% if user.is_staff %}
-                                    <li><a class="dropdown-item text-warning" href="/admin/"><i class="fas fa-shield-halved me-2"></i> Tizim boshqaruvi</a></li>
+                                    <li><a class="dropdown-item rounded-3 py-2 text-warning" href="/admin/"><i class="fas fa-user-shield me-2"></i> Admin Panel</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider opacity-50"></li>
                                 <li>
-                                    <form action="{% url 'logout' %}" method="post" class="p-1">
+                                    <form action="{% url 'logout' %}" method="post">
                                         {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger w-100 border-0 bg-transparent rounded-pill">
-                                            <i class="fas fa-power-off me-2"></i> Tizimdan chiqish
+                                        <button type="submit" class="dropdown-item rounded-3 py-2 text-danger border-0 bg-transparent w-100 text-start">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Chiqish
                                         </button>
                                     </form>
                                 </li>
                             </ul>
                         </div>
                     {% else %}
-                        <a class="btn btn-primary-premium animate__animated animate__fadeInRight" href="{% url 'login' %}">Kirish</a>
+                        <a class="btn btn-primary px-4 py-2 rounded-pill fw-bold shadow-sm animate__animated animate__fadeInRight" href="{% url 'login' %}">
+                            Kirish <i class="fas fa-arrow-right-long ms-2"></i>
+                        </a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="alert-wrapper px-3">
+    <div class="alert-wrapper">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-premium alert-dismissible fade show animate__animated animate__fadeInRight mb-3 shadow-lg" role="alert" style="border-left-color: {% if message.tags == 'success' %}#10b981{% elif message.tags == 'error' %}#ef4444{% else %}#3b82f6{% endif %};">
-                    <div class="me-3 fs-5">
-                        {% if message.tags == 'success' %}<i class="fas fa-check-circle text-success"></i>
-                        {% elif message.tags == 'error' %}<i class="fas fa-circle-exclamation text-danger"></i>
-                        {% else %}<i class="fas fa-info-circle text-info"></i>{% endif %}
+                <div class="alert alert-premium alert-dismissible fade show animate__animated animate__fadeInRight mb-3" role="alert" style="border-left-color: {% if message.tags == 'success' %}#10b981{% elif message.tags == 'error' %}#ef4444{% else %}#3b82f6{% endif %};">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 fs-4">
+                            {% if message.tags == 'success' %}<i class="fas fa-check-circle text-success"></i>
+                            {% elif message.tags == 'error' %}<i class="fas fa-exclamation-circle text-danger"></i>
+                            {% else %}<i class="fas fa-info-circle text-info"></i>{% endif %}
+                        </div>
+                        <div class="fw-bold pe-4">{{ message }}</div>
                     </div>
-                    <div class="pe-3">{{ message }}</div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -341,47 +256,32 @@
     <footer class="footer">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <a href="#" class="footer-logo">
-                        <i class="fas fa-graduation-cap text-primary me-2"></i>DMS
-                    </a>
-                    <p class="text-muted small mt-2 mb-0 fw-medium">Innovatsion ta'lim va kelajak texnologiyalari markazi.</p>
+                <div class="col-md-6 text-center text-md-start">
+                    <span class="fw-bold fs-5"><i class="fas fa-graduation-cap text-primary me-2"></i>DMS</span>
+                    <p class="text-muted small mt-2 mb-0">HM Intellektual Ta'lim Platformasi &copy; 2026. Barcha huquqlar himoyalangan.</p>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <div class="social-links mb-2">
-                        <a href="#" class="text-muted me-3 fs-5 hover-indigo"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="text-muted me-3 fs-5 hover-indigo"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-muted fs-5 hover-indigo"><i class="fab fa-youtube"></i></a>
-                    </div>
-                    <small class="text-muted">&copy; 2026 DMS Academy. Barcha huquqlar himoyalangan.</small>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-telegram"></i></a>
+                    <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-muted fs-5"><i class="fab fa-youtube"></i></a>
                 </div>
             </div>
         </div>
     </footer>
-    <style>
-        .ranking-nav-link { background: #f8fafc; border: 1px solid #e2e8f0; transition: 0.3s; }
-        .ranking-nav-link:hover { background: #ffffff; border-color: #fbbf24; transform: translateY(-2px); }
-        .ranking-icon-wrapper { width: 30px; height: 30px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Navbar Scroll Effect
-        window.addEventListener('scroll', function() {
+        // Navbar scroll effect
+        window.onscroll = function() {
             const nav = document.getElementById('mainNavbar');
-            if (window.scrollY > 50) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
+            if (window.pageYOffset > 50) { nav.classList.add('scrolled'); }
+            else { nav.classList.remove('scrolled'); }
+        };
 
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
+        // Auto-hide alerts
+        setTimeout(() => {
             let alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                let bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
+            alerts.forEach(a => { new bootstrap.Alert(a).close(); });
         }, 5000);
     </script>
 </body>

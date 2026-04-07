@@ -27,6 +27,15 @@ urlpatterns = [
     path('statistics/', views.student_analytics, name='student_analytics'),
     path('ranking/', views.ranking_view, name='ranking_view'),
 
+    # 7. TEST BUILDER (O'QITUVCHI UCHUN)
     path('instructor/quiz-builder/<int:lesson_id>/', views.quiz_builder, name='quiz_builder'),
     path('instructor/quiz-delete/<int:lesson_id>/', views.delete_quiz, name='delete_quiz'),
+
+    # 8. KUTUBXONA VA RESURSLAR
+    path('resources/', views.resource_hub, name='resource_hub'),
+    path('resources/upload/', views.upload_resource, name='upload_resource'),
+
+    # 9. DINAMIK AJAX (O'qituvchi fan tanlaganda kafedralarni yuklash)
+    # MUHIM: add_lesson.html dagi fetch URL manzili aynan shu name bilan bog'lanadi
+    path('ajax/get-departments/', views.get_departments_by_subject, name='get_departments_ajax'),
 ]
