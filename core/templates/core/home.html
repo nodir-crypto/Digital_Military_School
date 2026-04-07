@@ -98,7 +98,7 @@
                     <div class="rank-item-premium d-flex align-items-center mb-3 p-2 rounded-4">
                         <div class="rank-number-box me-3 {% if forloop.first %}gold{% endif %}">{{ forloop.counter }}</div>
                         {% if top.avatar %}
-                            <img src="{{ top.avatar.url }}" alt="Avatar" class="rounded-circle me-3 border shadow-sm" width="38">
+                            <img src="{{ top.avatar.url }}" alt="Avatar" class="rounded-circle me-3 border shadow-sm" width="38px" height="38px">
                         {% else %}
                             <img src="https://ui-avatars.com/api/?name={{ top.get_full_name }}&background=random" class="rounded-circle me-3 border shadow-sm" width="38">
                         {% endif %}
