@@ -38,4 +38,12 @@ urlpatterns = [
     # 9. DINAMIK AJAX (O'qituvchi fan tanlaganda kafedralarni yuklash)
     # MUHIM: add_lesson.html dagi fetch URL manzili aynan shu name bilan bog'lanadi
     path('ajax/get-departments/', views.get_departments_by_subject, name='get_departments_ajax'),
+
+    # 10. Global resurslar uchun
+    path('resource/global/<int:pk>/edit/', views.edit_global_resource, name='edit_global_resource'),
+    path('resource/global/<int:pk>/delete/', views.delete_global_resource, name='delete_global_resource'),
+
+    # 11.  Kafedra resurslari uchun
+    path('resource/dept/<int:pk>/edit/', views.edit_dept_resource, name='edit_dept_resource'),
+    path('resource/dept/<int:pk>/delete/', views.delete_dept_resource, name='delete_dept_resource'),
 ]

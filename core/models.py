@@ -177,27 +177,38 @@ class QuizAttempt(models.Model):
 # RESURSLAR VA KUTUBXONA (O'zgarishsiz qoldi)
 # ###########################################
 
+# models.py
+
+# Fayl turlari uchun o'zgarmas tanlovlar
+FILE_TYPE_CHOICES = [
+    ('pdf', 'PDF Kitob'),
+    ('doc', 'Word hujjat'),
+    ('video', 'Video darslik'),
+    ('audio', 'Audio darslik'),
+    ('ppt', 'Prezentatsiya'),
+]
+
 class BaseResource(models.Model):
     title = models.CharField("Resurs nomi", max_length=255)
     file = models.FileField("Fayl", upload_to='resources/%Y/%m/', validators=[validate_file_size])
-    file_type = models.CharField("Fayl turi", max_length=10, default='pdf')
+    # Choices qo'shildi:
+    file_type = models.CharField("Fayl turi", max_length=10, choices=FILE_TYPE_CHOICES, default='pdf')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
 
-
 class DepartmentResource(BaseResource):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='dept_resources')
-    image = models.ImageField(upload_to='resource_covers/', null=True, blank=True)
-
+    image = models.ImageField("Muqova", upload_to='resource_covers/', null=True, blank=True)
 
 class GlobalLibrary(models.Model):
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='resources/%Y/%m/')
     image = models.ImageField(upload_to='resource_covers/', null=True, blank=True)
-    file_type = models.CharField(max_length=10)
+    # Bu yerga ham choices qo'shish tavsiya etiladi:
+    file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, default='pdf')
     description = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}DMS | {{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4 animate__animated animate__fadeIn">
+        <a href="{% url 'resource_hub' %}" class="text-decoration-none text-muted smallest fw-bold text-uppercase">
+            <i class="fas fa-chevron-left me-2"></i> Kutubxonaga qaytish
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4 col-md-5 order-2 order-md-1 animate__animated animate__fadeInLeft">
+            <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                <p class="smallest fw-bold text-uppercase text-primary mb-3 ms-2">Jonli ko'rinish:</p>
+
+                <div class="resource-book-card shadow-lg border-0 mx-auto" style="max-width: 280px;">
+                    <div class="book-cover-wrapper">
+                        <img id="preview-img" src="{% if form.instance.image %}{{ form.instance.image.url }}{% else %}https://placehold.co/400x600/4F46E5/FFF?text=MUQOVA{% endif %}"
+                             class="book-cover" alt="Preview">
+
+                        <div class="cover-overlay">
+                            <span class="badge bg-white text-dark rounded-pill px-3 py-2 fw-bold shadow-sm">Ko'rish rejimi</span>
+                        </div>
+                    </div>
+                    <div class="book-info p-3 bg-white">
+                        <h6 id="preview-title" class="book-title text-truncate mb-2">{{ form.instance.title|default:"Resurs nomi" }}</h6>
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
+                            <span id="preview-badge" class="badge bg-soft-primary text-primary smallest px-2 py-1">
+                                {{ form.instance.file_type|upper|default:"FORMAT" }}
+                            </span>
+                            <span class="smallest text-muted"><i class="far fa-calendar-alt me-1"></i> {{ form.instance.created_at|date:"d.m.Y"|default:"Bugun" }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-4 rounded-4 border-0 shadow-sm smallest fw-bold text-center">
+                    <i class="fas fa-info-circle me-1"></i> O'zgarishlar saqlanganidan so'ng kuchga kiradi.
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-md-7 order-1 order-md-2 animate__animated animate__fadeInRight">
+            <div class="card border-0 shadow-premium rounded-5 overflow-hidden">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="mb-5">
+                        <h2 class="fw-900 text-slate-900 mb-1">{{ title }}</h2>
+                        <span class="badge bg-soft-warning text-warning rounded-pill px-3">Tahrirlash rejimi</span>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" id="edit-form">
+                        {% csrf_token %}
+
+                        <div class="row g-4">
+                            {% for field in form %}
+                            <div class="{% if field.name == 'description' %}col-12{% else %}col-md-6{% endif %}">
+                                <label class="form-label smallest fw-bold text-uppercase text-slate-500 ms-2" for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+
+                                <div class="input-group-modern">
+                                    {# Django form field render #}
+                                    {{ field }}
+                                </div>
+
+                                {% if field.errors %}
+                                    {% for error in field.errors %}
+                                        <div class="text-danger smallest mt-1 ms-2 fw-bold animate__animated animate__shakeX">
+                                            <i class="fas fa-circle-exclamation me-1"></i> {{ error }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-primary-premium py-3 rounded-pill fw-black shadow-lg">
+                                <i class="fas fa-save me-2"></i> O'ZGARISHLARNI SAQLASH
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* TYPOGRAPHY & PREMIUM COLORS */
+    .fw-900 { font-weight: 900; }
+    .fw-black { font-weight: 900; letter-spacing: 0.5px; }
+    .smallest { font-size: 0.72rem; letter-spacing: 0.5px; }
+    .shadow-premium { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08); }
+    .bg-soft-primary { background-color: rgba(79, 70, 229, 0.1); }
+    .bg-soft-warning { background-color: rgba(245, 158, 11, 0.1); }
+
+    /* FORM INPUTS - Professional styling */
+    .form-control, .form-select {
+        border: 2px solid #f1f5f9 !important;
+        border-radius: 16px !important;
+        padding: 12px 20px !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        transition: all 0.3s ease !important;
+        background-color: #f8fafc !important;
+        display: block !important; /* Ko'rinishini ta'minlash uchun */
+        width: 100% !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #4F46E5 !important;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
+        background-color: #fff !important;
+        outline: none !important;
+    }
+
+    /* PREVIEW CARD STYLES */
+    .resource-book-card {
+        border-radius: 24px;
+        overflow: hidden;
+        transition: 0.4s;
+        border: 1px solid #f1f5f9;
+        background: #fff;
+    }
+    .book-cover-wrapper { position: relative; height: 350px; overflow: hidden; background: #f8fafc; }
+    .book-cover { width: 100%; height: 100%; object-fit: cover; }
+    .book-title { font-weight: 800; font-size: 0.95rem; color: #1e293b; }
+
+    .btn-primary-premium {
+        background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+        border: none; color: white; transition: 0.3s ease;
+    }
+    .btn-primary-premium:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        color: white;
+    }
+
+<!--    -->
+
+    /* Select menyusi ichidagi matn ko'rinmasligini hal qilish */
+    .form-select {
+        color: #1e293b !important; /* To'q ko'k/qora rang */
+        background-color: #ffffff !important;
+        cursor: pointer;
+    }
+
+    /* Tanlovlar (options) uchun maxsus rang berish */
+    .form-select option {
+        color: #1e293b !important;
+        background-color: #ffffff !important;
+        padding: 12px;
+    }
+
+    /* Tanlangan (selected) holatdagi ko'rinish */
+    .form-select:focus {
+        border-color: #4F46E5 !important;
+        color: #1e293b !important;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Elementlarni topish (Dinamik selectorlar bilan)
+    const inputs = {
+        title: document.querySelector('[name="title"]'),
+        fileType: document.querySelector('[name="file_type"]'),
+        image: document.querySelector('[name="image"]')
+    };
+
+    const preview = {
+        title: document.getElementById('preview-title'),
+        badge: document.getElementById('preview-badge'),
+        img: document.getElementById('preview-img')
+    };
+
+    /**
+     * PREVIEW YANGILASH FUNKSIYASI
+     */
+    function refreshPreview() {
+        // Sarlavha
+        if (inputs.title) {
+            preview.title.innerText = inputs.title.value.trim() || "Resurs nomi";
+        }
+
+        // Fayl turi (Dropdown matnini olish)
+        if (inputs.fileType && inputs.fileType.selectedIndex !== -1) {
+            const selectedOption = inputs.fileType.options[inputs.fileType.selectedIndex];
+            const text = selectedOption.text;
+
+            // Agar "---------" tanlanmagan bo'lsa
+            if (text && !text.includes('---')) {
+                preview.badge.innerText = text.toUpperCase();
+                preview.badge.style.display = 'inline-block';
+            } else {
+                preview.badge.innerText = "FORMAT";
+            }
+        }
+    }
+
+    // 2. INITIALIZE: Sahifa yuklanganda mavjud ma'lumotlarni ko'rsatish
+    refreshPreview();
+
+    // 3. EVENT LISTENERS: O'zgarishlarni real vaqtda kuzatish
+
+    // Sarlavha o'zgarganda
+    if (inputs.title) {
+        inputs.title.addEventListener('input', refreshPreview);
+    }
+
+    // Dropdown o'zgarganda (Sizdagi asosiy muammo yechimi)
+    if (inputs.fileType) {
+        // Dropdown ko'rinmasligini oldini olish uchun majburiy klass
+        inputs.fileType.classList.add('form-select');
+        inputs.fileType.addEventListener('change', function() {
+            refreshPreview();
+            // Kichik animatsiya
+            preview.badge.classList.add('animate__animated', 'animate__pulse');
+            setTimeout(() => preview.badge.classList.remove('animate__pulse'), 500);
+        });
+    }
+
+    // Rasm yuklanganda
+    if (inputs.image) {
+        inputs.image.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.img.src = e.target.result;
+                    preview.img.classList.add('animate__animated', 'animate__fadeIn');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

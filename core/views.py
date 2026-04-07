@@ -14,7 +14,7 @@ from .models import (
     Subject, Lesson, Quiz, Choice, Question,
     DepartmentResource, GlobalLibrary, QuizAttempt, Department
 )
-from .forms import LessonForm, ProfileEditForm
+from .forms import LessonForm, ProfileEditForm, DepartmentResourceForm, GlobalLibraryForm
 
 User = get_user_model()
 
@@ -393,3 +393,64 @@ def upload_resource(request):
             messages.error(request, f"Xatolik: {e}")
         return redirect('resource_hub')
     return render(request, 'resources/upload.html')
+
+
+# ================================================================
+# 7. --- GLOBAL RESOURCE EDIT/DELETE ---
+# ================================================================
+
+
+@login_required
+def edit_global_resource(request, pk):
+    # Faqat o'zi yuklagan resursni olish
+    resource = get_object_or_404(GlobalLibrary, pk=pk, uploaded_by=request.user)
+
+    if request.method == 'POST':
+        form = GlobalLibraryForm(request.POST, request.FILES, instance=resource)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Umumiy resurs muvaffaqiyatli yangilandi!")
+            return redirect('resource_hub')
+    else:
+        form = GlobalLibraryForm(instance=resource)
+
+    return render(request, 'core/edit_resource.html', {'form': form, 'title': 'Umumiy resursni tahrirlash'})
+
+
+@login_required
+def delete_global_resource(request, pk):
+    resource = get_object_or_404(GlobalLibrary, pk=pk, uploaded_by=request.user)
+    if request.method == 'POST':
+        resource.delete()
+        messages.success(request, "Resurs o'chirib tashlandi.")
+    return redirect('resource_hub')
+
+
+
+# ====================================================================
+# 8. --- DEPARTMENT RESOURCE EDIT/DELETE ---
+# ====================================================================
+
+@login_required
+def edit_dept_resource(request, pk):
+    resource = get_object_or_404(DepartmentResource, pk=pk, uploaded_by=request.user)
+
+    if request.method == 'POST':
+        form = DepartmentResourceForm(request.POST, request.FILES, instance=resource)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Kafedra resursi yangilandi!")
+            return redirect('resource_hub')
+    else:
+        form = DepartmentResourceForm(instance=resource)
+
+    return render(request, 'core/edit_resource.html', {'form': form, 'title': 'Kafedra resursini tahrirlash'})
+
+
+@login_required
+def delete_dept_resource(request, pk):
+    resource = get_object_or_404(DepartmentResource, pk=pk, uploaded_by=request.user)
+    if request.method == 'POST':
+        resource.delete()
+        messages.success(request, "Kafedra resursi o'chirildi.")
+    return redirect('resource_hub')

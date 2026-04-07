@@ -50,7 +50,7 @@
                                 </div>
                             {% endif %}
                             <div class="cover-overlay">
-                                <div class="d-flex flex-column gap-2 p-3">
+                                <div class="d-flex flex-column gap-2 p-3 w-100 px-4">
                                     <button class="btn btn-white rounded-pill fw-bold btn-sm shadow-sm"
                                             onclick="openBookModal('{{ res.title|escapejs }}', '{% if res.image %}{{ res.image.url }}{% else %}https://placehold.co/400x600/4F46E5/FFF?text={{ res.file_type|upper }}{% endif %}', '{{ res.description|default:"Tavsif mavjud emas"|escapejs }}', '{{ res.file.url }}', '{{ res.file_type|upper }}', '{{ res.created_at|date:"d.m.Y" }}')">
                                         <i class="fas fa-eye me-1 text-primary"></i> Batafsil
@@ -58,12 +58,35 @@
                                     <a href="{{ res.file.url }}" class="btn btn-primary-premium rounded-pill fw-bold btn-sm" download>
                                         <i class="fas fa-download me-1"></i> Yuklash
                                     </a>
+
+                                    {% if res.uploaded_by == request.user %}
+                                    <hr class="border-white opacity-25 my-1">
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'edit_dept_resource' res.pk %}" class="btn btn-warning rounded-pill fw-bold btn-sm flex-fill">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{% url 'delete_dept_resource' res.pk %}" method="post" class="flex-fill d-grid">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger rounded-pill fw-bold btn-sm" onclick="return confirm('Ushbu resursni o\'chirmoqchimisiz?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                         <div class="book-info p-3">
-                            <h6 class="book-title text-truncate" title="{{ res.title }}">{{ res.title }}</h6>
-                            <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="book-title text-truncate mb-2" title="{{ res.title }}">{{ res.title }}</h6>
+
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-user-tie text-primary smallest me-1"></i>
+                                <span class="smallest text-secondary fw-bold text-truncate">
+                                    {{ res.uploaded_by.rank|default:"" }} {{ res.uploaded_by.last_name }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-top pt-2">
                                 <span class="badge bg-soft-primary text-primary smallest">{{ res.file_type|upper }}</span>
                                 <span class="smallest text-muted">{{ res.created_at|date:"d.m.Y" }}</span>
                             </div>
@@ -94,7 +117,7 @@
                                 </div>
                             {% endif %}
                             <div class="cover-overlay">
-                                <div class="d-flex flex-column gap-2 p-3">
+                                <div class="d-flex flex-column gap-2 p-3 w-100 px-4">
                                     <button class="btn btn-white rounded-pill fw-bold btn-sm"
                                             onclick="openBookModal('{{ res.title|escapejs }}', '{% if res.image %}{{ res.image.url }}{% else %}https://placehold.co/400x600/1e293b/FFF?text={{ res.file_type|upper }}{% endif %}', '{{ res.description|default:"Mazkur kitob umumiy kutubxona fondiga tegishli."|escapejs }}', '{{ res.file.url }}', '{{ res.file_type|upper }}', '{{ res.created_at|date:"d.m.Y" }}')">
                                         <i class="fas fa-eye me-1 text-primary"></i> Ko'rish
@@ -102,11 +125,32 @@
                                     <a href="{{ res.file.url }}" class="btn btn-dark rounded-pill fw-bold btn-sm" download>
                                         <i class="fas fa-download me-1"></i> Yuklash
                                     </a>
+
+                                    {% if res.uploaded_by == request.user %}
+                                    <hr class="border-white opacity-25 my-1">
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'edit_global_resource' res.pk %}" class="btn btn-warning rounded-pill fw-bold btn-sm flex-fill text-dark">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{% url 'delete_global_resource' res.pk %}" method="post" class="flex-fill d-grid">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger rounded-pill fw-bold btn-sm" onclick="return confirm('Global resursni o\'chirmoqchimisiz?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                         <div class="book-info p-3">
-                            <h6 class="book-title text-truncate">{{ res.title }}</h6>
+                            <h6 class="book-title text-truncate mb-2">{{ res.title }}</h6>
+
+                            <div class="d-flex align-items-center mb-1 text-muted smallest">
+                                <i class="fas fa-shield-halved me-1 text-success"></i>
+                                <span class="fw-bold">{{ res.uploaded_by.last_name }} tomonidan yuklandi</span>
+                            </div>
+
                             <span class="smallest text-muted fw-bold"><i class="fas fa-check-circle text-success me-1"></i> Tasdiqlangan</span>
                         </div>
                     </div>
@@ -169,6 +213,7 @@
     .fw-800 { font-weight: 800; }
     .bg-slate-50 { background-color: #f8fafc; }
     .bg-soft-primary { background-color: rgba(79, 70, 229, 0.1); }
+    .border-top { border-top: 1px solid #f1f5f9 !important; }
 
     /* MODERN TABS */
     .modal-backdrop{z-index:-1;}

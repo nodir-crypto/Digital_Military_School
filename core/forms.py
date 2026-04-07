@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import Lesson, Subject, Department
+from .models import Lesson, Subject, Department, GlobalLibrary, DepartmentResource
 
 User = get_user_model()
 
@@ -28,8 +28,7 @@ class ProfileEditForm(forms.ModelForm):
 
 class LessonForm(forms.ModelForm):
     """
-    Dars qo'shish va tahrirlash formasi.
-    Professional filtrlash: Fan tanlanganda unga biriktirilgan kafedralarni yuklaydi.
+    Dars qo'shish va tahrirlash formasi (O'zgarishsiz qoldi).
     """
     class Meta:
         model = Lesson
@@ -44,34 +43,22 @@ class LessonForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if user:
-            # 1. O'qituvchi faqat o'zi "Mas'ul o'qituvchi" bo'lgan fanlarni ko'radi
             self.fields['subject'].queryset = Subject.objects.filter(instructors=user)
-
-            # 2. DINAMIK KAFEDRA FILTRI (Senior Logic)
-            # Agar dars tahrirlanayotgan bo'lsa (instance mavjud bo'lsa)
             if self.instance.pk and self.instance.subject:
-                # Faqat o'sha fanga biriktirilgan kafedralarni tanlash imkonini beramiz
                 self.fields['target_departments'].queryset = self.instance.subject.available_in_departments.all()
             else:
-                # Yangi dars yuklanayotganda, JS (AJAX) kafedralarni yuklaguncha
-                # barcha kafedralarni ko'rsatib turamiz yoki bo'sh qoldiramiz.
-                # Foydalanuvchi tajribasi uchun barcha kafedralarni ko'rsatish ma'qul.
                 self.fields['target_departments'].queryset = Department.objects.all()
 
         self._apply_widget_styling()
 
     def _apply_widget_styling(self):
-        """Barcha maydonlarga CSS klasslarini aqlli biriktirish"""
         for field_name, field in self.fields.items():
             if field_name == 'target_departments':
-                # Checkbox inputlar uchun klass
                 field.widget.attrs.update({'class': 'form-check-input'})
             elif field_name == 'subject':
                 field.widget.attrs.update({'class': 'form-select rounded-pill px-3'})
             else:
                 field.widget.attrs.update({'class': 'form-control rounded-4'})
-
-    # --- VALIDATSIYALAR (O'zgarishsiz, mustahkam saqlandi) ---
 
     def clean_video(self):
         video = self.cleaned_data.get('video')
@@ -90,3 +77,33 @@ class LessonForm(forms.ModelForm):
             if ext not in valid_extensions:
                 raise forms.ValidationError(f"Faqat quyidagi fayllarni yuklash mumkin: {', '.join(valid_extensions).upper()}")
         return file
+
+
+# ====================================================================
+# YANGI QO'SHILGAN QISMLAR: KUTUBXONA FORMALARI
+# ====================================================================
+
+class GlobalLibraryForm(forms.ModelForm):
+    class Meta:
+        model = GlobalLibrary
+        fields = ['title', 'file', 'image', 'file_type', 'description']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control rounded-pill px-4', 'placeholder': 'Resurs nomi'}),
+            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+            'file_type': forms.Select(attrs={'class': 'form-select rounded-pill px-3'}), # form-select klassi shart
+            'description': forms.Textarea(attrs={'class': 'form-control rounded-4', 'rows': 3}),
+        }
+
+class DepartmentResourceForm(forms.ModelForm):
+    """Kafedra resurslarini qo'shish va tahrirlash uchun"""
+    class Meta:
+        model = DepartmentResource
+        fields = ['title', 'file', 'image', 'file_type', 'department']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control rounded-pill px-4', 'placeholder': 'Resurs nomi'}),
+            'department': forms.Select(attrs={'class': 'form-select rounded-pill px-3'}),
+            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'image': forms.FileInput(attrs={'class': 'form-control'}),
+            'file_type': forms.Select(attrs={'class': 'form-select rounded-pill px-3'}),
+        }
