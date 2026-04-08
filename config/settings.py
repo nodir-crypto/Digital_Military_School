@@ -133,3 +133,37 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = 'home'      # Login bo'lgach bosh sahifaga
 LOGOUT_REDIRECT_URL = 'login'    # Chiqqandan so'ng login sahifasiga
 LOGIN_URL = 'login'              # Login qilinmagan bo'lsa yo'naltiriladigan joy
+
+
+import os
+from dotenv import load_dotenv
+
+# .env faylini yuklash
+load_dotenv()
+
+
+# #################################################################
+# EMAIL SOZLAMALARI (PROFESSIONAL SMTP CONFIGURATION)
+# #################################################################
+
+# Email yuborish mexanizmi (Backend)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# SMTP server manzili (Gmail uchun)
+EMAIL_HOST = 'smtp.gmail.com'
+
+# Port sozlamalari (TLS xavfsizligi bilan)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+# Xavfsiz ma'lumotlarni .env dan o'qish
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# Saytdan chiquvchi xatlar kimdan ekanligini ko'rsatish
+# Bu foydalanuvchining "Inbox"ida chiroyli ko'rinishini ta'minlaydi
+DEFAULT_FROM_EMAIL = f"DMS Academy <{EMAIL_HOST_USER}>"
+
+# Xat yuborish vaqti chegarasi (Server qotib qolmasligi uchun)
+EMAIL_TIMEOUT = 30

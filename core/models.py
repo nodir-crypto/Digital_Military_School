@@ -1,4 +1,6 @@
 import os
+import secrets
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -178,6 +180,8 @@ class QuizAttempt(models.Model):
 # ###########################################
 
 # models.py
+from django.utils import timezone
+from datetime import timedelta
 
 # Fayl turlari uchun o'zgarmas tanlovlar
 FILE_TYPE_CHOICES = [
@@ -212,3 +216,22 @@ class GlobalLibrary(models.Model):
     description = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+# ###########################################
+# Password reset
+# ###########################################
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp_code = models.CharField(max_length=6)
+    token = models.CharField(max_length=100, unique=True) # URL uchun xavfsiz kalit
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_verified = models.BooleanField(default=False)
+
+    def is_valid(self):
+        # Kod 10 daqiqa davomida amal qiladi
+        return not self.is_verified and self.created_at >= timezone.now() - timedelta(minutes=10)
+
+    @staticmethod
+    def generate_token():
+        return secrets.token_urlsafe(32)

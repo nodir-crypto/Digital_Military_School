@@ -1,5 +1,8 @@
+import random
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.core.exceptions import PermissionDenied
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -12,7 +15,7 @@ import json
 # Modellar va Formalarni import qilish
 from .models import (
     Subject, Lesson, Quiz, Choice, Question,
-    DepartmentResource, GlobalLibrary, QuizAttempt, Department
+    DepartmentResource, GlobalLibrary, QuizAttempt, Department, PasswordResetOTP
 )
 from .forms import LessonForm, ProfileEditForm, DepartmentResourceForm, GlobalLibraryForm
 
@@ -454,3 +457,95 @@ def delete_dept_resource(request, pk):
         resource.delete()
         messages.success(request, "Kafedra resursi o'chirildi.")
     return redirect('resource_hub')
+
+
+# ================================================================
+# 6. Send Email Reset Password
+# ================================================================
+# 1. Username va Emailni tekshirib kod yuborish
+
+def forget_password_view(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+
+        # 1-QADAM: Username VA Email bazada bir-biriga mos kelishini tekshiramiz
+        user = User.objects.filter(username=username, email=email).first()
+
+        if user:
+            # 2-QADAM: Agar foydalanuvchi topilsa, unga tegishli eski kodlarni tozalaymiz
+            PasswordResetOTP.objects.filter(user=user).delete()
+
+            # 3-QADAM: Yangi OTP kod va xavfsiz Token yaratamiz
+            otp = str(random.randint(100000, 999999))
+            token = PasswordResetOTP.generate_token()
+
+            PasswordResetOTP.objects.create(
+                user=user,
+                otp_code=otp,
+                token=token
+            )
+
+            # 4-QADAM: Aynan o'sha topilgan foydalanuvchining emailiga kod yuboramiz
+            subject = 'DMS Academy | Parolni tiklash kodi'
+            message = f'Assalomu alaykum, {user.get_full_name() or user.username}!\n\n' \
+                      f'Sizning parolni tiklash uchun tasdiqlash kodingiz: {otp}\n' \
+                      f'Ushbu kod 10 daqiqa davomida amal qiladi.\n\n' \
+                      f'Agar bu soʻrovni siz yubormagan boʻlsangiz, xabarga eʼtibor bermang.'
+
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    'DMS Academy <noreply@dms.uz>',
+                    [user.email],  # Foydalanuvchining bazadagi tasdiqlangan emailiga yuboriladi
+                    fail_silently=False,
+                )
+                return redirect('verify_otp', token=token)
+            except Exception as e:
+                print("----------------------------")
+                print(f"EMAIL YUBORISHDA XATO: {e}")
+                print("----------------------------")
+                messages.error(request, "Email yuborishda xatolik yuz berdi. Keyinroq qayta urinib ko'ring.")
+        else:
+            # Xavfsizlik uchun: "Username yoki Email noto'g'ri" deb umumiy xabar beriladi
+            messages.error(request, "Kiritilgan username yoki email bo'yicha foydalanuvchi topilmadi!")
+
+    return render(request, 'password/forget_password.html')
+
+# 2. Kodni tekshirish
+def verify_otp_view(request, token):
+    otp_obj = get_object_or_404(PasswordResetOTP, token=token)
+
+    if not otp_obj.is_valid():
+        messages.error(request, "Kod muddati o'tgan yoki allaqachon ishlatilgan!")
+        return redirect('forget_password')
+
+    if request.method == "POST":
+        input_otp = request.POST.get('otp')
+        if input_otp == otp_obj.otp_code:
+            otp_obj.is_verified = True
+            otp_obj.save()
+            return redirect('reset_password', token=token)
+        messages.error(request, "Kod noto'g'ri!")
+
+    return render(request, 'password/verify_otp.html', {'token': token})
+
+
+# 3. Yangi parolni o'rnatish
+def reset_password_view(request, token):
+    otp_obj = get_object_or_404(PasswordResetOTP, token=token, is_verified=True)
+
+    if request.method == "POST":
+        pass1 = request.POST.get('pass1')
+        pass2 = request.POST.get('pass2')
+        if pass1 == pass2:
+            user = otp_obj.user
+            user.password = make_password(pass1)
+            user.save()
+            otp_obj.delete()  # Xavfsizlik uchun ishlatilgan tokenni o'chiramiz
+            messages.success(request, "Parol muvaffaqiyatli o'zgartirildi!")
+            return redirect('login')
+        messages.error(request, "Parollar mos kelmadi!")
+
+    return render(request, 'password/reset_password.html')

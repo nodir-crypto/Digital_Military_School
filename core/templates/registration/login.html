@@ -28,6 +28,15 @@
                         <form method="POST" autocomplete="off">
                             {% csrf_token %}
 
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert {% if message.tags == 'success' %}alert-premium-success{% else %}alert-premium-danger{% endif %} animate__animated animate__fadeIn mb-4">
+                                        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-circle-exclamation{% endif %} me-2"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
                             {% if form.errors or form.non_field_errors %}
                                 <div class="alert alert-premium-danger animate__animated animate__shakeX mb-4">
                                     <i class="fas fa-circle-exclamation me-2"></i>
@@ -48,7 +57,7 @@
                             <div class="form-group-premium mb-3">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <label for="id_password" class="label-premium">Maxfiy parol</label>
-                                    <a href="#" class="forgot-link">Parolni unutdingizmi?</a>
+                                    <a href="{% url 'forget_password' %}" class="forgot-link">Parolni unutdingizmi?</a>
                                 </div>
                                 <div class="input-wrapper-premium">
                                     <i class="fas fa-key input-icon"></i>
@@ -69,12 +78,6 @@
                                 </button>
                             </div>
 
-                            <div class="text-center">
-                                <p class="small text-muted fw-medium">
-                                    Hisobingiz yo'qmi?
-                                    <a href="#" class="register-link ms-1">Ro'yxatdan o'tish</a>
-                                </p>
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -91,12 +94,13 @@
 </div>
 
 <style>
-    /* --- Styles & Themes --- */
+    /* --- Styles & Themes (O'zgarishsiz qoldi) --- */
     :root {
         --primary-indigo: #4F46E5;
         --primary-gradient: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
         --slate-900: #0f172a;
         --slate-50: #f8fafc;
+        --emerald-600: #059669;
     }
 
     .fw-black { font-weight: 900; }
@@ -104,15 +108,12 @@
     .letter-spacing-wide { letter-spacing: 1px; }
     .smallest { font-size: 0.65rem; }
 
-    /* Login Page Wrapper */
     .login-page-wrapper {
         background-color: #f1f5f9;
         position: relative;
         overflow: hidden;
-<!--        margin-top: -85px; /* Navbar balandligini kompensatsiya qilish */-->
     }
 
-    /* Background Decor */
     .login-bg-decor .circle {
         position: absolute;
         border-radius: 50%;
@@ -122,7 +123,6 @@
     .circle-1 { width: 300px; height: 300px; background: rgba(79, 70, 229, 0.1); top: -50px; right: -50px; }
     .circle-2 { width: 250px; height: 250px; background: rgba(59, 130, 246, 0.1); bottom: -50px; left: -50px; }
 
-    /* Login Card */
     .login-card {
         background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(20px);
@@ -133,7 +133,6 @@
     }
     .shadow-premium { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
 
-    /* Icon Box */
     .login-icon-box {
         width: 70px; height: 70px;
         background: var(--primary-gradient);
@@ -143,10 +142,9 @@
         box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.4);
     }
 
-    /* Form Styles */
     .label-premium {
         font-size: 0.75rem; font-weight: 800;
-        color: #64748b; text-uppercase; margin-bottom: 8px; display: block;
+        color: #64748b; text-transform: uppercase; margin-bottom: 8px; display: block;
     }
     .input-wrapper-premium { position: relative; }
     .input-icon {
@@ -164,10 +162,8 @@
         box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
     }
 
-    /* Links & Buttons */
     .forgot-link { font-size: 0.75rem; font-weight: 700; color: var(--primary-indigo); text-decoration: none; }
     .forgot-link:hover { text-decoration: underline; }
-    .register-link { color: var(--primary-indigo); font-weight: 800; text-decoration: none; }
 
     .btn-login-premium {
         background: var(--primary-gradient); color: white;
@@ -179,6 +175,12 @@
     /* Alert Styling */
     .alert-premium-danger {
         background: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2;
+        padding: 12px 18px; border-radius: 15px; font-size: 0.85rem; font-weight: 600;
+    }
+
+    /* Muvaffaqiyat xabari uchun maxsus style */
+    .alert-premium-success {
+        background: #ecfdf5; color: var(--emerald-600); border: 1px solid #d1fae5;
         padding: 12px 18px; border-radius: 15px; font-size: 0.85rem; font-weight: 600;
     }
 </style>

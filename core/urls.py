@@ -46,4 +46,9 @@ urlpatterns = [
     # 11.  Kafedra resurslari uchun
     path('resource/dept/<int:pk>/edit/', views.edit_dept_resource, name='edit_dept_resource'),
     path('resource/dept/<int:pk>/delete/', views.delete_dept_resource, name='delete_dept_resource'),
+
+    # 12.  Reset Password
+    path('forget-password/', views.forget_password_view, name='forget_password'),
+    path('verify-otp/<str:token>/', views.verify_otp_view, name='verify_otp'),
+    path('reset-password/<str:token>/', views.reset_password_view, name='reset_password'),
 ]
