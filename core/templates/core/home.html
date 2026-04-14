@@ -124,7 +124,7 @@
 </div>
 
 <style>
-    /* Barcha CSS uslublaringiz o'zgarishsiz qoladi */
+    /* STYLE QISMI ASLO O'ZGARTIRILMADI */
     :root { --indigo: #4F46E5; --indigo-light: #818cf8; --indigo-soft: #eef2ff; --slate-900: #0f172a; --slate-600: #475569; }
     body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
     .fw-black { font-weight: 900; }
@@ -169,6 +169,24 @@
     const ajaxContainer = document.getElementById('ajax_container');
     let timeout = null;
 
+    /**
+     * Professional Handler:
+     * Serverdan butun HTML hujjat kelsa ham, faqat kerakli qismini ajratib oladi.
+     */
+    function updateAjaxContent(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        // Kelgan HTML ichidan faqat bizga kerakli ID'li divni qidiradi
+        const newContent = doc.getElementById('ajax_container');
+
+        if (newContent) {
+            ajaxContainer.innerHTML = newContent.innerHTML;
+        } else {
+            // Agar server faqat partial yuborgan bo'lsa (ya'ni view'da is_ajax tekshiruvi bo'lsa)
+            ajaxContainer.innerHTML = html;
+        }
+    }
+
     // 1. LIVE SEARCH LOGIKASI
     searchInput.addEventListener('input', function() {
         clearTimeout(timeout);
@@ -179,11 +197,9 @@
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(response => response.text())
-            .then(html => {
-                ajaxContainer.innerHTML = html;
-            })
+            .then(html => updateAjaxContent(html))
             .catch(err => console.error('Live search xatosi:', err));
-        }, 300); // 300ms kechikish (debounce)
+        }, 300);
     });
 
     // 2. AJAX PAGINATION LOGIKASI
@@ -199,8 +215,7 @@
             })
             .then(response => response.text())
             .then(html => {
-                ajaxContainer.innerHTML = html;
-                // Sahifani fanlar boshiga silliq siljitish
+                updateAjaxContent(html);
                 window.scrollTo({ top: 400, behavior: 'smooth' });
             })
             .catch(err => console.error('Pagination xatosi:', err));

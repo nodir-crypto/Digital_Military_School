@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ subject.name }} | Akademik Reyting{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 px-md-5" style="background: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0, transparent 50%); min-height: 100vh;">
+    
+    <div class="card border-0 shadow-lg rounded-5 mb-5 overflow-hidden animate__animated animate__fadeInDown" 
+         style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5)!important;">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item small fw-bold text-uppercase opacity-50"><a href="{% url 'home' %}" class="text-decoration-none text-dark">Boshqaruv</a></li>
+                            <li class="breadcrumb-item small fw-bold text-uppercase opacity-50">{{ dept.name }}</li>
+                            <li class="breadcrumb-item small fw-bold text-uppercase text-primary active">Fan Reytingi</li>
+                        </ol>
+                    </nav>
+                    <h1 class="display-5 fw-black text-dark tracking-tight mb-2">
+                        <span class="text-primary-gradient">{{ subject.name }}</span> bo'yicha tahlil
+                    </h1>
+                    <p class="text-muted fw-medium mb-0 fs-5">
+                        <i class="fas fa-users-rectangle me-2"></i> {{ dept.name }} kursantlarining o'zlashtirish ko'rsatkichlari
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-4 mt-md-0">
+                    <div class="stats-badge-ultra">
+                        <span class="label">O'rtacha o'zlashtirish</span>
+                        <span class="value">{{ rankings.0.spec_avg|default:"0"|floatformat:1 }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-5 p-4 mb-4 bg-white animate__animated animate__fadeInLeft">
+                <h4 class="fw-black mb-4 d-flex align-items-center">
+                    <i class="fas fa-crown text-warning me-2"></i> Peshqadamlar
+                </h4>
+                <div class="podium-list">
+                    {% for student in rankings|slice:":3" %}
+                    <div class="podium-item d-flex align-items-center p-3 rounded-4 mb-3 {% if forloop.first %}bg-gold-soft{% elif forloop.counter == 2 %}bg-silver-soft{% else %}bg-bronze-soft{% endif %}">
+                        <div class="rank-number me-3">{{ forloop.counter }}</div>
+                        <div class="avatar-box me-3">
+                            {% if student.avatar %}
+                                <img src="{{ student.avatar.url }}" class="rounded-circle shadow-sm" width="50" height="50">
+                            {% else %}
+                                <div class="no-avatar-mini">{{ student.username|slice:":1"|upper }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="info">
+                            <h6 class="mb-0 fw-bold">{{ student.get_full_name|default:student.username }}</h6>
+                            <span class="small opacity-75">{{ student.spec_avg|floatformat:1 }}% natija</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm rounded-5 p-4 bg-dark text-white animate__animated animate__fadeInLeft" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                <h5 class="fw-bold mb-3">Tizim xabari</h5>
+                <p class="small opacity-75">Mazkur reyting kursantlarning ushbu fan doirasida topshirgan barcha testlari (quiz) asosida real vaqtda hisoblanadi.</p>
+                <hr class="opacity-25">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small fw-bold">Jami ishtirokchilar:</span>
+                    <span class="badge bg-primary rounded-pill">{{ rankings.count }} nafar</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-5 overflow-hidden bg-white animate__animated animate__fadeInUp">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-4 border-0 text-uppercase small fw-black opacity-50">O'rin</th>
+                                <th class="py-4 border-0 text-uppercase small fw-black opacity-50">Kursant</th>
+                                <th class="py-4 border-0 text-uppercase small fw-black opacity-50 text-center">Testlar soni</th>
+                                <th class="py-4 border-0 text-uppercase small fw-black opacity-50 text-center">Ball (Avg)</th>
+                                <th class="pe-4 py-4 border-0 text-uppercase small fw-black opacity-50 text-end">Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in rankings %}
+                            <tr class="ranking-row">
+                                <td class="ps-4">
+                                    <span class="fw-black fs-5 {% if forloop.counter <= 3 %}text-primary{% else %}text-muted opacity-25{% endif %}">
+                                        #{{ forloop.counter }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-wrapper me-3">
+                                            {% if student.avatar %}
+                                                <img src="{{ student.avatar.url }}" class="rounded-3 shadow-sm" width="40" height="40">
+                                            {% else %}
+                                                <div class="no-avatar-micro">{{ student.username|slice:":1"|upper }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ student.get_full_name|default:student.username }}</div>
+                                            <div class="small text-muted">{{ student.email|default:"Talaba" }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center fw-bold text-secondary">
+                                    {{ student.tests_done }} ta
+                                </td>
+                                <td class="text-center">
+                                    <div class="score-pill {% if student.spec_avg >= 85 %}bg-success-subtle text-success{% elif student.spec_avg >= 60 %}bg-warning-subtle text-warning{% else %}bg-danger-subtle text-danger{% endif %}">
+                                        {{ student.spec_avg|floatformat:1 }}
+                                    </div>
+                                </td>
+                                <td class="pe-4">
+                                    <div class="progress rounded-pill" style="height: 6px; width: 100px; margin-left: auto;">
+                                        <div class="progress-bar rounded-pill" role="progressbar" 
+                                             style="width: {{ student.spec_avg }}%; background: var(--primary-gradient);" 
+                                             aria-valuenow="{{ student.spec_avg }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="opacity-25 mb-3"><i class="fas fa-chart-bar fa-3x"></i></div>
+                                    <h5 class="fw-bold text-muted">Hozircha natijalar mavjud emas</h5>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Ultra Modern UI Styles */
+    .fw-black { font-weight: 900; }
+    .text-primary-gradient { 
+        background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .stats-badge-ultra {
+        background: white;
+        padding: 15px 30px;
+        border-radius: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        display: inline-block;
+        text-align: right;
+        border: 1px solid #f1f5f9;
+    }
+    .stats-badge-ultra .label { display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; }
+    .stats-badge-ultra .value { font-size: 2rem; font-weight: 900; color: #4F46E5; }
+
+    /* Podium Styles */
+    .bg-gold-soft { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.2); }
+    .bg-silver-soft { background: rgba(192, 192, 192, 0.1); border: 1px solid rgba(192, 192, 192, 0.2); }
+    .bg-bronze-soft { background: rgba(205, 127, 50, 0.1); border: 1px solid rgba(205, 127, 50, 0.2); }
+
+    .rank-number {
+        width: 32px; height: 32px;
+        background: white;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 0.9rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .no-avatar-mini, .no-avatar-micro {
+        background: var(--primary-gradient);
+        color: white;
+        font-weight: 900;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .no-avatar-mini { width: 50px; height: 50px; border-radius: 50%; font-size: 1.2rem; }
+    .no-avatar-micro { width: 40px; height: 40px; border-radius: 10px; font-size: 1rem; }
+
+    /* Table Styles */
+    .ranking-row { transition: 0.3s; cursor: default; }
+    .ranking-row:hover { background-color: #f8fafc!important; transform: scale(1.01); }
+
+    .score-pill {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 100px;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
+
+    .bg-success-subtle { background: #ecfdf5; color: #059669; }
+    .bg-warning-subtle { background: #fffbeb; color: #d97706; }
+    .bg-danger-subtle { background: #fef2f2; color: #dc2626; }
+
+    @media (max-width: 768px) {
+        .display-5 { font-size: 2.5rem; }
+    }
+</style>
+{% endblock %}

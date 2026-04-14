@@ -21,9 +21,9 @@
             <p class="ultra-subtitle mx-auto">Fakultetning eng yuqori intellektual ko'rsatkichli kursantlari</p>
         </header>
 
-        <div class="row g-4 align-items-end mb-5 pb-5">
+        <div class="row g-4 align-items-end mb-5 pb-5 podium-wrapper">
             {% for student in top_3 %}
-            <div class="col-lg-4 col-md-6 {% if forloop.counter == 1 %}order-first order-lg-2{% elif forloop.counter == 2 %}order-lg-1{% else %}order-lg-3{% endif %}">
+            <div class="col-lg-4 col-md-6 {% if forloop.counter == 1 %}order-lg-2 order-first{% elif forloop.counter == 2 %}order-lg-1{% else %}order-lg-3{% endif %}">
                 <div class="bento-podium rank-{{ forloop.counter }} animate__animated animate__slideInUp">
                     <div class="glass-tag">
                         <i class="fa-solid fa-microchip me-2"></i> {{ student.department.name|default:"Kafedra mavjud emas" }}
@@ -68,7 +68,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-11">
                 <div class="galaxy-card shadow-2xl border-0">
-                    <div class="galaxy-header p-4 d-flex justify-content-between align-items-center">
+                    <div class="galaxy-header p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
                             <h5 class="m-0 fw-bold text-white"><i class="fa-solid fa-ranking-star me-2 text-indigo"></i> Umumiy Peshqadamlar</h5>
                             <p class="m-0 gradient-text small mt-1">4-o'rindan keyingi barcha faol kursantlar ro'yxati</p>
@@ -76,7 +76,7 @@
                         <div class="counter-pill">{{ others|length|add:3 }} Ta Faol</div>
                     </div>
 
-                    <div class="table-responsive">
+                    <div class="table-responsive custom-table-scroll">
                         <table class="table galaxy-table mb-0 align-middle">
                             <thead>
                                 <tr class="gradient-text">
@@ -89,11 +89,10 @@
                             </thead>
                             <tbody>
                                 {% for student in others %}
-                                <tr class="galaxy-row ">
+                                <tr class="galaxy-row">
                                     <td class="ps-4">
-                                        <div class="rank-index-box ">#{{ forloop.counter|add:3 }}</div>
+                                        <div class="rank-index-box">#{{ forloop.counter|add:3 }}</div>
                                     </td>
-
                                     <td>
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="mini-pfp-wrapper">
@@ -109,24 +108,21 @@
                                             </div>
                                         </div>
                                     </td>
-
                                     <td>
                                         <div class="d-flex flex-column">
                                             <span class="dept-micro-text">{{ student.department.name|default:"Noma'lum Kafedra" }}</span>
                                             <span class="text-muted smallest text-uppercase">{{ student.profile.direction|default:"Kursant" }}</span>
                                         </div>
                                     </td>
-
                                     <td class="text-center">
                                         <div class="test-count-badge">
-                                            <i class="fa-solid fa-poll-h me-1 gradient-text"></i> {{ student.total_tests }} ta test
+                                            <i class="fa-solid fa-poll-h me-1 gradient-text"></i> {{ student.total_tests }} ta
                                         </div>
                                     </td>
-
                                     <td class="text-end pe-4">
                                         <div class="d-flex flex-column align-items-end">
                                             <span class="score-final-premium gradient-text">{{ student.avg_score|floatformat:1 }}%</span>
-                                            <div class="progress w-100 mt-2" style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; width: 120px !important;">
+                                            <div class="progress w-100 mt-2 score-progress">
                                                 <div class="progress-bar gradient-bar-bg" style="width: {{ student.avg_score }}%"></div>
                                             </div>
                                         </div>
@@ -143,7 +139,6 @@
 </div>
 
 <style>
-/* --- ULTRA-MODERN PREMIUM DESIGN SYSTEM --- */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Grotesk:wght@300;500;700&display=swap');
 
 :root {
@@ -155,10 +150,16 @@
     --white-10: rgba(255, 255, 255, 0.1);
 }
 
-/* --- MUAMMONI HAL QILUVCHI QISM (DUAL SCROLLBAR FIX) --- */
-/* 1. Brauzerning asosiy scrollbarini dizaynlashtirish */
+/* --- OVERFLOW & SCROLLBAR FIX --- */
+html, body {
+    background-color: var(--deep-bg);
+    overflow-x: hidden;
+    height: 100%;
+}
+
 ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
 }
 ::-webkit-scrollbar-track {
     background: var(--deep-bg);
@@ -168,43 +169,62 @@
     border-radius: 10px;
 }
 
-/* 2. Ichki elementlardagi ortiqcha scrollbarlarni yashirish */
-.ultimate-dashboard,
-.table-responsive,
-body,
-html {
-    scrollbar-width: thin; /* Firefox uchun */
-    scrollbar-color: var(--electric-indigo) var(--deep-bg); /* Firefox */
+.ultimate-dashboard {
+    background-color: var(--deep-bg);
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #f8fafc;
+    position: relative;
+    overflow: hidden; /* Mesh animatsiyalar tashqariga chiqmasligi uchun */
 }
 
-/* table-responsive ichidagi scrollbarni faqat kerak bo'lganda (mobil) ko'rsatish,
-   lekin u ham asosiy scrollbar bilan bir xil ko'rinishi uchun */
-.table-responsive::-webkit-scrollbar {
-    height: 4px;
+/* --- TABLE RESPONSIVE ENHANCEMENT --- */
+.custom-table-scroll {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* O'zgarmagan asosiy stylelar */
-.ultimate-dashboard { background-color: var(--deep-bg); min-height: 100vh; font-family: 'Plus Jakarta Sans', sans-serif; color: #f8fafc; position: relative; }
+.galaxy-table {
+    min-width: 900px; /* Jadval siqilib ketmasligi uchun minimal kenglik */
+}
+
+/* --- MAIN DESIGN ELEMENTS --- */
 .mesh-bg { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.mesh-sphere { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; }
+.mesh-sphere { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.25; will-change: transform; }
 .sphere-1 { top: -10%; left: -10%; width: 600px; height: 600px; background: var(--electric-indigo); animation: float 15s infinite alternate; }
 .sphere-2 { bottom: 0%; right: -5%; width: 500px; height: 500px; background: var(--cyber-cyan); animation: float 12s infinite alternate-reverse; }
 .sphere-3 { top: 30%; right: 20%; width: 300px; height: 300px; background: #7c3aed; opacity: 0.1; }
 
 @keyframes float { 0% { transform: translate(0,0); } 100% { transform: translate(50px, 50px); } }
 
-.ultra-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 3.8rem; letter-spacing: -3px; line-height: 1; }
+.ultra-title { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: clamp(2rem, 8vw, 3.8rem); letter-spacing: -3px; line-height: 1; }
 .gradient-text { background: linear-gradient(135deg, var(--cyber-cyan) 0%, var(--electric-indigo) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.ultra-subtitle { color: #94a3b8; font-weight: 400; letter-spacing: 1px; max-width: 500px; }
-.cyber-chip { display: inline-flex; align-items: center; background: var(--white-10); padding: 8px 16px; border-radius: 12px; border: 1px solid var(--white-10); backdrop-filter: blur(5px); }
-.pulse-indicator { width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px #10b981; }
-.chip-text { font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #cbd5e1; }
+.ultra-subtitle { color: #94a3b8; font-weight: 400; letter-spacing: 1px; max-width: 500px; font-size: 0.9rem; }
 
-.bento-podium { background: var(--card-glass); backdrop-filter: blur(25px); border-radius: 45px; border: 1px solid var(--white-10); padding: 35px; position: relative; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.bento-podium:hover { transform: translateY(-15px) scale(1.02); border-color: var(--electric-indigo); box-shadow: 0 30px 60px -10px rgba(0,0,0,0.5); }
-.rank-1 { height: 460px; z-index: 5; border: 2px solid var(--gold-premium); }
+/* Podium Cards */
+.bento-podium {
+    background: var(--card-glass);
+    backdrop-filter: blur(25px);
+    border-radius: 45px;
+    border: 1px solid var(--white-10);
+    padding: 35px;
+    position: relative;
+    transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    margin-bottom: 20px;
+}
+.bento-podium:hover { transform: translateY(-15px); border-color: var(--electric-indigo); box-shadow: 0 30px 60px -10px rgba(0,0,0,0.5); }
+
+.rank-1 { height: 460px; z-index: 5; border: 2px solid var(--gold-premium); box-shadow: 0 0 30px rgba(251, 191, 36, 0.1); }
 .rank-2 { height: 400px; }
 .rank-3 { height: 380px; }
+
+/* Responsive Podium Adjustments */
+@media (max-width: 991px) {
+    .rank-1, .rank-2, .rank-3 { height: auto; }
+    .podium-wrapper { display: flex; flex-direction: column; align-items: center; }
+    .podium-wrapper > div { width: 100%; max-width: 450px; }
+}
 
 .avatar-ultra-wrapper { width: 120px; height: 120px; position: relative; }
 .rank-1 .avatar-ultra-wrapper { width: 150px; height: 150px; }
@@ -217,26 +237,29 @@ html {
 .u-label { font-size: 9px; font-weight: 800; color: #64748b; letter-spacing: 1px; }
 .u-val { font-size: 1.5rem; font-weight: 800; }
 
+/* Table Design */
 .galaxy-card { background: var(--card-glass); backdrop-filter: blur(20px); border-radius: 40px; border: 1px solid var(--white-10); overflow: hidden; }
 .galaxy-header { border-bottom: 1px solid var(--white-10); background: rgba(255,255,255,0.02); }
-.counter-pill { background: var(--electric-indigo); padding: 5px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+.counter-pill { background: var(--electric-indigo); padding: 5px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; white-space: nowrap; }
 
 .galaxy-table thead th { background: transparent; color: #475569; font-size: 10px; font-weight: 800; border: none; padding: 25px 20px; letter-spacing: 1.5px; text-transform: uppercase; }
-.galaxy-row { transition: 0.3s; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.galaxy-row { transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.03); }
 .galaxy-row:hover { background: rgba(56, 189, 248, 0.05); }
 
+.score-progress { height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; width: 120px !important; }
 .rank-index-box { width: 42px; height: 42px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--cyber-cyan); border: 1px solid var(--white-10); font-size: 15px; }
 .dept-micro-text { font-size: 11px; color: var(--electric-indigo); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-.test-count-badge { background: rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 700; border: 1px solid var(--white-10); }
+.test-count-badge { background: rgba(255,255,255,0.05); color: #94a3b8; padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 700; border: 1px solid var(--white-10); white-space: nowrap; }
 .score-final-premium { font-size: 1.6rem; font-weight: 900; line-height: 1; }
 .gradient-bar-bg { background: linear-gradient(to right, var(--cyber-cyan), var(--electric-indigo)); }
 
-.glass-tag { position: absolute; top: 25px; left: 25px; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 14px; font-size: 10px; font-weight: 800; color: var(--cyber-cyan); border: 1px solid var(--white-10); display: flex; align-items: center; }
+.glass-tag { position: absolute; top: 25px; left: 25px; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 14px; font-size: 10px; font-weight: 800; color: var(--cyber-cyan); border: 1px solid var(--white-10); display: flex; align-items: center; z-index: 10; }
 .smallest { font-size: 10px; color: #64748b; }
 
-.gold{color:gold}
-.silver{color:silver}
-.bronze{color: brown}
+.gold { color: #fbbf24; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5)); font-size: 2rem; }
+.silver { color: #cbd5e1; font-size: 1.8rem; }
+.bronze { color: #a8a29e; font-size: 1.8rem; }
+
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 </style>
 {% endblock %}

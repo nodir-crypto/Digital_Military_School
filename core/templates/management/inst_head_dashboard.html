@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-root">
+    <div class="container-fluid py-5 px-md-5">
+
+        <div class="glass-header animate__animated animate__fadeInDown">
+            <div class="header-inner">
+                <div class="row align-items-center justify-content-between g-4">
+                    <div class="col-md-8">
+                        <div class="badge-premium mb-3">
+                            <span class="pulse-dot"></span>
+                            MARKAZIY NAZORAT TIZIMI
+                        </div>
+                        <h1 class="header-title">
+                            Institut <span class="text-accent">Boshqaruv</span> Markazi
+                        </h1>
+                        <p class="header-subtitle">
+                            <i class="fas fa-layer-group me-2"></i>
+                            Strategik monitoring va markaziy boshqaruv platformasi
+                        </p>
+                    </div>
+                    <div class="col-md-auto">
+                        <button onclick="openMessageModal()" class="btn-action-primary">
+                            <div class="btn-shine"></div>
+                            <i class="fas fa-paper-plane me-2"></i>
+                            <span>YANGI BUYRUQ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5 animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card-ultra">
+                    <div class="stat-content">
+                        <span class="stat-label">Jami Kafedralar</span>
+                        <h2 class="stat-value">{{ departments.count }}</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-primary text-primary">
+                        <i class="fas fa-university"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card-ultra">
+                    <div class="stat-content">
+                        <span class="stat-label">O'rtacha KPI</span>
+                        <h2 class="stat-value text-success">{{ overall_stats.inst_avg|default:"0"|floatformat:1 }}%</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-success text-success">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card-ultra">
+                    <div class="stat-content">
+                        <span class="stat-label">Onlayn Rahbarlar</span>
+                        <h2 class="stat-value text-warning" id="online-heads-count">{{ overall_stats.online_now }}</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-warning text-warning">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="stat-card-ultra">
+                    <div class="stat-content">
+                        <span class="stat-label">Xabarnomalar</span>
+                        <h2 class="stat-value text-purple">{{ unread_notifications|default:"0" }}</h2>
+                    </div>
+                    <div class="stat-icon bg-soft-purple text-purple">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider mb-4">
+            <h2 class="section-title">
+                <i class="fas fa-th-large me-2"></i> Kafedralar Strukturasi
+            </h2>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="row g-4">
+            {% for dept in departments %}
+            <div class="col-md-6 col-lg-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                <div class="dept-card-premium">
+                    <div class="dept-card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="dept-logo-box">
+                                {% if dept.logo %}
+                                    <img src="{{ dept.logo.url }}" alt="{{ dept.name }}">
+                                {% else %}
+                                    <i class="fas fa-building text-muted"></i>
+                                {% endif %}
+                            </div>
+                            <div class="status-indicator-pill {% if dept.is_online %}online{% endif %}">
+                                {% if dept.is_online %} Faol {% else %} Offline {% endif %}
+                            </div>
+                        </div>
+
+                        <h3 class="dept-name">{{ dept.name }}</h3>
+                        <p class="dept-desc">{{ dept.description|default:"Kafedra faoliyati bo'yicha tahliliy ma'lumotlar." }}</p>
+
+                        <div class="dept-info-grid">
+                            <div class="info-item">
+                                <span class="info-label">KURSANTLAR</span>
+                                <span class="info-value">{{ dept.total_students}}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">REYTING</span>
+                                <span class="info-value accent-text">{{ dept.avg_score|default:"0"|floatformat:1 }}</span>
+                            </div>
+                        </div>
+
+                        <div class="dept-card-actions">
+                            <a href="{% url 'department_detail_view' dept.id %}" class="btn-view-detail">
+                                <span>TAHLIL MARKAZI</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <button onclick="openMessageModal('{{ dept.id }}')" class="btn-view-msg">
+                                <i class="fas fa-comment-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="empty-state-card">
+                    <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                    <p class="text-muted fw-bold">Ma'lumotlar mavjud emas</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 bg-transparent">
+            <div class="ultra-glass-card">
+                <div class="modal-accent-line"></div>
+
+                <form action="{% url 'send_official_message' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-header-custom">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="icon-shape-premium">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <div>
+                                <h4 class="m-0 fw-black text-dark">Rasmiy Buyruq</h4>
+                                <div class="secure-label">
+                                    <span class="secure-dot"></span>
+                                    <span class="text-xs fw-bold">SECURE ENCRYPTED CHANNEL</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close-custom" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body-custom">
+                        <div class="form-group-premium">
+                            <label class="label-premium">
+                                <i class="fas fa-user-shield me-2"></i> QABUL QILUVCHI MAS'UL
+                            </label>
+                            <div class="input-wrapper-premium">
+                                <select name="receiver_id" id="receiver_select" class="form-select-custom shadow-sm">
+                                    {% for dept in departments %}
+                                        {% for member in dept.members.all %}
+                                            {% if member.role == 'DEPT_HEAD' %}
+                                                <option value="{{ member.id }}">{{ dept.name }} — {{ member.get_full_name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group-premium mt-4">
+                            <label class="label-premium">
+                                <i class="fas fa-pen-nib me-2"></i> BUYRUQ TAFSILOTLARI
+                            </label>
+                            <div class="input-wrapper-premium">
+                                <textarea name="content" rows="6" required class="form-control-custom shadow-sm"
+                                          placeholder="Strategik ko'rsatmalarni professional tarzda bayon eting..."></textarea>
+                            </div>
+                            <div class="text-end mt-2">
+                                <span class="badge-tech">AUTO-LOGGING: ON</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer-custom">
+                        <button type="button" class="btn-cancel-premium" data-bs-dismiss="modal">BEKOR QILISH</button>
+                        <button type="submit" class="btn-send-premium">
+                            <span>TASDIQLASH VA YUBORISH</span>
+                            <i class="fas fa-bolt ms-2"></i>
+                            <div class="btn-shine-overlay"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-backdrop{display:none;}
+/* --- ULTRA SENIOR DESIGN ENGINE --- */
+:root {
+    --primary: #4f46e5;
+    --primary-glow: rgba(79, 70, 229, 0.3);
+    --dark: #0f172a;
+    --bg-main: #f8fafc;
+    --glass: rgba(255, 255, 255, 0.8);
+    --input-bg: #f1f5f9;
+}
+
+.dashboard-root {
+    background-color: var(--bg-main);
+    background-image:
+        radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.05) 0px, transparent 50%);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header & General UI */
+.glass-header { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 32px; padding: 2.5rem; margin-bottom: 3rem; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); }
+.header-title { font-weight: 900; letter-spacing: -2px; color: var(--dark); font-size: 2.8rem; }
+.text-accent { background: linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.badge-premium { display: inline-flex; align-items: center; gap: 8px; background: var(--dark); color: white; padding: 6px 16px; border-radius: 100px; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+.pulse-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: pulse 2s infinite; }
+
+/* Stat Cards */
+.stat-card-ultra { background: white; padding: 2rem; border-radius: 24px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eef2f6; transition: 0.3s ease; }
+.stat-card-ultra:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.05); }
+.stat-label { color: #64748b; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-value { font-weight: 900; font-size: 2rem; margin: 0; color: var(--dark); }
+.stat-icon { width: 56px; height: 56px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+
+/* Dept Cards */
+.dept-card-premium { background: white; border-radius: 30px; padding: 10px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid #eef2f6; height: 100%; }
+.dept-card-premium:hover { transform: translateY(-12px); border-color: var(--primary); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.08); }
+.dept-card-body { padding: 25px; background: #fff; border-radius: 25px; height: 100%; display: flex; flex-direction: column; }
+.dept-logo-box { width: 70px; height: 70px; border-radius: 20px; background: #f8fafc; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #f1f5f9; }
+.dept-logo-box img { width: 100%; height: 100%; object-fit: cover; }
+.status-indicator-pill { padding: 5px 12px; border-radius: 100px; font-size: 10px; font-weight: 800; background: #f1f5f9; color: #94a3b8; }
+.status-indicator-pill.online { background: #ecfdf5; color: #10b981; }
+.dept-name { font-weight: 800; color: var(--dark); letter-spacing: -0.5px; margin-bottom: 10px; }
+.dept-desc { font-size: 13px; color: #64748b; line-height: 1.6; flex-grow: 1; }
+.dept-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 20px; margin-bottom: 20px; }
+.info-label { display: block; font-size: 9px; font-weight: 800; color: #94a3b8; }
+.info-value { font-size: 1.1rem; font-weight: 800; color: var(--dark); }
+
+/* Buttons */
+.btn-view-detail { flex-grow: 1; background: var(--dark); color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
+.btn-view-detail:hover { background: var(--primary); color: white; box-shadow: 0 10px 20px var(--primary-glow); }
+.btn-view-msg { width: 50px; background: #f1f5f9; border: none; border-radius: 16px; color: #64748b; transition: 0.3s; }
+.btn-view-msg:hover { background: #e2e8f0; color: var(--dark); }
+.btn-action-primary { background: var(--dark); color: white; border: none; padding: 16px 32px; border-radius: 18px; font-weight: 800; position: relative; overflow: hidden; }
+.btn-shine { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transition: 0.5s; }
+.btn-action-primary:hover .btn-shine { left: 100%; }
+
+/* --- PROFESSIONAL MODAL STYLING (THE FIX) --- */
+.ultra-glass-card {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 40px;
+    border: 1px solid #ffffff;
+    box-shadow: 0 50px 100px -20px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-accent-line {
+    position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+}
+
+.modal-header-custom { padding: 40px 50px 20px; display: flex; justify-content: space-between; align-items: center; }
+
+.icon-shape-premium {
+    width: 50px; height: 50px; background: var(--dark); color: white;
+    border-radius: 15px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; box-shadow: 0 10px 20px rgba(15, 23, 42, 0.2);
+}
+
+.secure-label { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.secure-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
+
+.btn-close-custom {
+    width: 36px; height: 36px; border-radius: 12px; border: none;
+    background: #f1f5f9; color: #94a3b8; transition: 0.3s;
+}
+.btn-close-custom:hover { background: #fee2e2; color: #ef4444; transform: rotate(90deg); }
+
+.modal-body-custom { padding: 20px 50px 40px; }
+
+.label-premium {
+    display: block; font-size: 11px; font-weight: 800; color: #64748b;
+    letter-spacing: 0.5px; margin-bottom: 12px; text-transform: uppercase;
+}
+
+.form-select-custom, .form-control-custom {
+    width: 100%; padding: 18px 25px; border-radius: 20px;
+    border: 2px solid #f1f5f9; background: var(--input-bg);
+    font-weight: 600; color: #1e293b; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-select-custom:focus, .form-control-custom:focus {
+    background: #ffffff; border-color: var(--primary);
+    box-shadow: 0 15px 30px var(--primary-glow) !important;
+    outline: none;
+}
+
+.badge-tech {
+    font-size: 9px; font-weight: 800; background: #f1f5f9; color: #64748b;
+    padding: 4px 10px; border-radius: 6px; letter-spacing: 0.5px;
+}
+
+.modal-footer-custom { padding: 0 50px 50px; display: flex; gap: 15px; }
+
+.btn-send-premium {
+    flex: 2; padding: 20px; border-radius: 20px; border: none;
+    background: var(--dark); color: white; font-weight: 800;
+    position: relative; overflow: hidden; transition: 0.3s;
+}
+.btn-send-premium:hover { background: #1e293b; transform: translateY(-4px); box-shadow: 0 20px 40px rgba(15, 23, 42, 0.3); }
+
+.btn-cancel-premium {
+    flex: 1; padding: 20px; border-radius: 20px; border: 2px solid #e2e8f0;
+    background: white; color: #64748b; font-weight: 700; transition: 0.3s;
+}
+.btn-cancel-premium:hover { background: #f8fafc; color: var(--dark); border-color: #cbd5e1; }
+
+.btn-shine-overlay {
+    position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: 0.6s;
+}
+.btn-send-premium:hover .btn-shine-overlay { left: 100%; }
+
+
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+</style>
+
+<script>
+    let bsModal;
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalEl = document.getElementById('messageModal');
+        if (modalEl) {
+            bsModal = new bootstrap.Modal(modalEl);
+        }
+    });
+
+    function openMessageModal(memberId = null) {
+        if (memberId) {
+            let select = document.getElementById('receiver_select');
+            if(select) select.value = memberId;
+        }
+        if(bsModal) bsModal.show();
+    }
+</script>
+{% endblock %}

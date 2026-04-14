@@ -1,6 +1,7 @@
 import os
 import secrets
-
+import datetime
+from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -23,11 +24,13 @@ def validate_file_size(value):
 
 
 # ###########################################
-# KAFEDRA VA FOYDALANUVCHI (O'zgarishsiz qoldi)
+# KAFEDRA VA FOYDALANUVCHI (PROFESSIONAL QO'SHIMCHALAR)
 # ###########################################
 
 class Department(models.Model):
     name = models.CharField("Kafedra nomi", max_length=100)
+    logo = models.ImageField("Kafedra logotipi", upload_to='dept_logos/', null=True, blank=True)
+    description = models.TextField("Kafedra haqida qisqacha", blank=True)
 
     def __str__(self):
         return self.name
@@ -38,13 +41,31 @@ class Department(models.Model):
 
 
 class User(AbstractUser):
+    # SENIOR TIP: Rollarni o'zgaruvchi (constant) sifatida saqlash xatolikni oldini oladi
+    KURSANT = 'KURSANT'
+    INSTRUCTOR = 'INSTRUCTOR'
+    DEPT_HEAD = 'DEPT_HEAD'
+    INST_HEAD = 'INST_HEAD'
+
     ROLE_CHOICES = (
-        ('KURSANT', 'Kursant'),
-        ('INSTRUCTOR', 'Instruktor'),
-        ('COMMANDER', 'Komandir')
+        (KURSANT, 'Kursant'),
+        (INSTRUCTOR, 'Instruktor'),
+        (DEPT_HEAD, 'Kafedra Boshlig\'i'),
+        (INST_HEAD, 'Institut Boshlig\'i'),
     )
-    role = models.CharField("Roli", max_length=20, choices=ROLE_CHOICES, default='KURSANT')
+
+    # verbose_name qo'shildi, bu admin panelda ustun nomini chiroyli ko'rsatadi
+    role = models.CharField(
+        "Foydalanuvchi Roli",
+        max_length=21,
+        choices=ROLE_CHOICES,
+        default=KURSANT
+    )
     rank = models.CharField("Harbiy unvon", max_length=50, blank=True)
+
+    is_starshina = models.BooleanField("Starshina statusi", default=False)
+    last_online = models.DateTimeField("Oxirgi faollik", null=True, blank=True)
+
     department = models.ForeignKey(
         Department, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='members', verbose_name="Tegishli kafedrasi"
@@ -62,28 +83,42 @@ class User(AbstractUser):
 
 
 # ###########################################
-# FANLAR MODELI (ASOSIY O'ZGARISH SHU YERDA)
+# COMMAND MESSAGING (BUYRUQ VA XABARLAR)
+# ###########################################
+
+class OfficialMessage(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_official_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_official_messages')
+    subject = models.CharField("Xabar mavzusi", max_length=255, blank=True)
+    body = models.TextField("Xabar matni")
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.sender} -> {self.receiver} ({self.created_at.strftime('%Y-%m-%d')})"
+
+    class Meta:
+        verbose_name = "Rasmiy Xabar"
+        verbose_name_plural = "Rasmiy Xabarlar"
+        ordering = ['-created_at']
+
+
+# ###########################################
+# FANLAR MODELI
 # ###########################################
 
 class Subject(models.Model):
     name = models.CharField("Fan nomi", max_length=200)
-
-    # 1-MUAMMO YECHIMI: Fan endi bitta kafedraga tegishli emas,
-    # u bir nechta kafedraga tegishli bo'lishi mumkin (ManyToMany)
     available_in_departments = models.ManyToManyField(
         Department,
         related_name='subjects',
         verbose_name="Ushbu fan o'qitiladigan kafedralar",
         help_text="Tarix fanini qaysi kafedralar ko'ra olishini belgilang"
     )
-
-    # Eski department maydonini o'chirib yubormaslik (yoki null=True qilish) tavsiya etiladi
-    # Lekin biz mantiqan ManyToMany ga o'tdik.
     department = models.ForeignKey(
         Department, on_delete=models.CASCADE, related_name='old_subjects',
         verbose_name="Asosiy kafedra (Eski)", null=True, blank=True
     )
-
     instructors = models.ManyToManyField(
         User, limit_choices_to={'role': 'INSTRUCTOR'},
         blank=True, related_name='assigned_subjects',
@@ -100,7 +135,7 @@ class Subject(models.Model):
 
 
 # ###########################################
-# DARSLAR MODELI (O'zgarishsiz qoldi)
+# DARSLAR MODELI
 # ###########################################
 
 class Lesson(models.Model):
@@ -134,7 +169,7 @@ class Lesson(models.Model):
 
 
 # ###########################################
-# TESTLAR TIZIMI (O'zgarishsiz qoldi)
+# TESTLAR TIZIMI
 # ###########################################
 
 class Quiz(models.Model):
@@ -176,14 +211,9 @@ class QuizAttempt(models.Model):
 
 
 # ###########################################
-# RESURSLAR VA KUTUBXONA (O'zgarishsiz qoldi)
+# RESURSLAR VA KUTUBXONA
 # ###########################################
 
-# models.py
-from django.utils import timezone
-from datetime import timedelta
-
-# Fayl turlari uchun o'zgarmas tanlovlar
 FILE_TYPE_CHOICES = [
     ('pdf', 'PDF Kitob'),
     ('doc', 'Word hujjat'),
@@ -192,10 +222,10 @@ FILE_TYPE_CHOICES = [
     ('ppt', 'Prezentatsiya'),
 ]
 
+
 class BaseResource(models.Model):
     title = models.CharField("Resurs nomi", max_length=255)
     file = models.FileField("Fayl", upload_to='resources/%Y/%m/', validators=[validate_file_size])
-    # Choices qo'shildi:
     file_type = models.CharField("Fayl turi", max_length=10, choices=FILE_TYPE_CHOICES, default='pdf')
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -203,19 +233,21 @@ class BaseResource(models.Model):
     class Meta:
         abstract = True
 
+
 class DepartmentResource(BaseResource):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='dept_resources')
     image = models.ImageField("Muqova", upload_to='resource_covers/', null=True, blank=True)
+
 
 class GlobalLibrary(models.Model):
     title = models.CharField(max_length=255)
     file = models.FileField(upload_to='resources/%Y/%m/')
     image = models.ImageField(upload_to='resource_covers/', null=True, blank=True)
-    # Bu yerga ham choices qo'shish tavsiya etiladi:
     file_type = models.CharField(max_length=10, choices=FILE_TYPE_CHOICES, default='pdf')
     description = models.TextField(null=True, blank=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
 
 # ###########################################
 # Password reset
@@ -224,13 +256,13 @@ class GlobalLibrary(models.Model):
 class PasswordResetOTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     otp_code = models.CharField(max_length=6)
-    token = models.CharField(max_length=100, unique=True) # URL uchun xavfsiz kalit
+    token = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_verified = models.BooleanField(default=False)
 
     def is_valid(self):
-        # Kod 10 daqiqa davomida amal qiladi
-        return not self.is_verified and self.created_at >= timezone.now() - timedelta(minutes=10)
+        expiration_time = self.created_at + datetime.timedelta(minutes=10)
+        return not self.is_verified and timezone.now() < expiration_time
 
     @staticmethod
     def generate_token():

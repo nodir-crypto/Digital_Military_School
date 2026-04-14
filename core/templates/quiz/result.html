@@ -18,7 +18,13 @@
                                     <i class="fas fa-redo-alt"></i>
                                 {% endif %}
                             </div>
-                            <h2 class="fw-black text-dark mb-1">{% if is_passed %}Ajoyib!{% else %}Yana bir bor{% endif %}</h2>
+                            <h2 class="fw-black text-dark mb-1">
+                                {% if is_passed %}
+                                    {% if score >= 90 %}Daxshatli natija! 🔥{% else %}Ajoyib!{% endif %}
+                                {% else %}
+                                    Yana bir bor urinib ko'ring
+                                {% endif %}
+                            </h2>
                             <p class="smallest fw-bold text-muted tracking-widest text-uppercase">{{ quiz.title }}</p>
                         </div>
 
@@ -41,22 +47,35 @@
 
                             <div class="trend-card mt-4 p-4 rounded-4 bg-white border-0 shadow-sm">
                                 <h6 class="fw-black text-slate-900 mb-4 smallest tracking-widest text-uppercase">Bilim darajasi trendi</h6>
-                                <div class="chart-container" style="height: 150px; width: 100%;">
-                                    <svg id="trendSvg" viewBox="0 0 500 150" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: hidden;">
-                                        <line x1="0" y1="20" x2="500" y2="20" stroke="#f1f5f9" stroke-width="1" />
-                                        <line x1="0" y1="75" x2="500" y2="75" stroke="#f1f5f9" stroke-width="1" />
-                                        <line x1="0" y1="130" x2="500" y2="130" stroke="#f1f5f9" stroke-width="2" />
 
-                                        <path id="trendPath" d="" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-
-                                        <g id="chartPoints"></g>
-                                    </svg>
+                                <div class="chart-container position-relative" style="height: 150px; width: 100%;">
+                                    {% if history|length > 1 %}
+                                        <svg id="trendSvg" viewBox="0 0 500 150" preserveAspectRatio="none" style="width: 100%; height: 100%; overflow: visible;">
+                                            <line x1="0" y1="20" x2="500" y2="20" stroke="#f1f5f9" stroke-width="1" />
+                                            <line x1="0" y1="75" x2="500" y2="75" stroke="#f1f5f9" stroke-width="1" />
+                                            <line x1="0" y1="130" x2="500" y2="130" stroke="#f1f5f9" stroke-width="2" />
+                                            <path id="trendPath" d="" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+                                            <g id="chartPoints"></g>
+                                        </svg>
+                                    {% else %}
+                                        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-center opacity-75">
+                                            <div class="mb-2">
+                                                <i class="fas fa-chart-line fa-2x text-slate-200"></i>
+                                            </div>
+                                            <p class="small text-muted px-4 mb-0" style="font-size: 0.75rem; line-height: 1.4;">
+                                                Dinamikani ko'rish uchun testni kamida <span class="text-primary fw-bold">ikki marta</span> topshirishingiz kerak.
+                                            </p>
+                                        </div>
+                                    {% endif %}
                                 </div>
+
+                                {% if history|length > 1 %}
                                 <div class="d-flex justify-content-between mt-3 px-1">
                                     {% for h in history %}
                                         <span class="smallest fw-bold text-slate-400">{{ h.completed_at|date:"d/m" }}</span>
                                     {% endfor %}
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -102,21 +121,19 @@
 </div>
 
 <style>
-/* --- CORE STYLES --- */
+/* --- STYLES --- */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap');
 
-.bg-gradient-dark { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
 .result-master-wrapper { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
 .result-card { border: 1px solid #f1f5f9; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05); }
 .status-bar { height: 6px; width: 100%; }
 
-/* Typography */
 .fw-black { font-weight: 800; }
 .smallest { font-size: 0.65rem; letter-spacing: 0.05rem; }
 .text-slate-900 { color: #0f172a; }
+.text-slate-200 { color: #e2e8f0; }
 .bg-slate-50 { background-color: #f8fafc; }
 
-/* Status Bubble */
 .status-bubble {
     width: 60px; height: 60px; margin: 0 auto;
     border-radius: 20px; display: flex; align-items: center; justify-content: center;
@@ -125,18 +142,15 @@
 .bg-success-soft { background: #dcfce7; color: #15803d; }
 .bg-danger-soft { background: #fee2e2; color: #b91c1c; }
 
-/* Score & Badge */
 .score-label-pill {
     display: inline-block; padding: 4px 12px; border-radius: 100px;
     color: white; font-size: 0.6rem; font-weight: 800;
     vertical-align: middle; margin-top: -40px; margin-left: 10px;
 }
 
-/* Custom Progress */
 .progress-track { height: 4px; background: #f1f5f9; border-radius: 10px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
 
-/* Buttons */
 .btn-dark-modern { background: #1e293b; color: white; border: none; transition: 0.3s; }
 .btn-dark-modern:hover { background: #020617; transform: translateY(-2px); color: white; }
 .btn-outline-soft { border: 1px solid #e2e8f0; color: #64748b; transition: 0.3s; }
@@ -150,34 +164,31 @@
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const scores = [{% for h in history %}{{ h.score }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+
+    // 2 tadan kam bo'lsa grafik chizilmaydi
+    if (scores.length <= 1) return;
+
     const svgWidth = 500;
     const svgHeight = 150;
-    const paddingX = 40; // Yonlardan xavfsiz masofa
-    const paddingY = 30; // Tepa va pastdan xavfsiz masofa (yozuvlar uchun)
-
-    if (scores.length === 0) return;
+    const paddingX = 40;
+    const paddingY = 30;
 
     const pointsContainer = document.getElementById('chartPoints');
     const path = document.getElementById('trendPath');
 
     const chartWidth = svgWidth - (paddingX * 2);
     const chartHeight = svgHeight - (paddingY * 2);
-
-    // stepX ni to'g'ri hisoblash (Division by zero xatosidan qochish)
-    const stepX = scores.length > 1 ? chartWidth / (scores.length - 1) : 0;
+    const stepX = chartWidth / (scores.length - 1);
 
     let pathData = "";
 
     scores.forEach((score, i) => {
-        // X koordinatasi: bitta nuqta bo'lsa markazda, ko'p bo'lsa yoyiladi
-        const x = scores.length > 1 ? (i * stepX) + paddingX : svgWidth / 2;
-
-        // Y koordinatasi: balandlikka teskari proporsional (0% pastda, 100% tepada)
+        const x = (i * stepX) + paddingX;
         const y = svgHeight - (score * chartHeight / 100) - paddingY;
 
         pathData += (i === 0 ? "M " : " L ") + x + " " + y;
 
-        // Foiz yozuvi (Nuqtadan 15px tepada)
+        // Foiz matni
         const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", x);
         text.setAttribute("y", y - 15);
@@ -199,7 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
         circle.style.transition = "all 0.3s ease";
         circle.style.cursor = "pointer";
 
-        // Hover effekti
         circle.onmouseover = () => { circle.setAttribute("r", "7"); circle.setAttribute("fill", "#4f46e5"); };
         circle.onmouseout = () => { circle.setAttribute("r", "5"); circle.setAttribute("fill", "white"); };
 
@@ -208,11 +218,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     path.setAttribute("d", pathData);
 
-    // Animatsiya: Chiziqning silliq chizilishi
     const length = path.getTotalLength();
     path.style.strokeDasharray = length;
     path.style.strokeDashoffset = length;
-    path.getBoundingClientRect(); // Layoutni yangilash
+    path.getBoundingClientRect();
     path.style.transition = "stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)";
     path.style.strokeDashoffset = "0";
 });

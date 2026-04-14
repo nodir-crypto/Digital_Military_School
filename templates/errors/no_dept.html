@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Kirish Cheklangan | DMS{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 85vh;">
+    <div class="text-center animate__animated animate__fadeIn">
+        
+        <div class="error-visual-wrapper mb-5 position-relative">
+            <div class="error-blob animate__animated animate__pulse animate__infinite"></div>
+            <div class="position-relative z-1">
+                <i class="fas fa-map-location-dot fa-6x text-primary-gradient mb-3"></i>
+            </div>
+            <div class="floating-icons">
+                <i class="fas fa-question-circle text-warning fa-2x floating-1"></i>
+                <i class="fas fa-lock text-danger fa-lg floating-2"></i>
+            </div>
+        </div>
+
+        <div class="error-content-box mx-auto" style="max-width: 600px;">
+            <h1 class="display-4 fw-black text-dark mb-3 tracking-tight">Kafedra Biriktirilmagan</h1>
+            
+            <div class="card border-0 shadow-lg rounded-5 mb-4 p-2" style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.4)!important;">
+                <div class="card-body p-4">
+                    <p class="text-muted fs-5 leading-relaxed">
+                        {% if message %}
+                            {{ message }}
+                        {% else %}
+                            Profilingiz tizimda to'liq konfiguratsiya qilinmagan. Sizning hisobingizga tegishli kafedra (department) topilmadi.
+                        {% endif %}
+                    </p>
+                    <hr class="opacity-10 my-4">
+                    <div class="d-flex align-items-center justify-content-center gap-2 small text-primary fw-bold">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Eslatma: Boshqaruv paneli faqat kafedraga biriktirilgan rahbarlar uchun ochiq.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 justify-content-center">
+                <div class="col-sm-auto">
+                    <a href="{% url 'home' %}" class="btn btn-dark w-100 px-5 py-3 rounded-4 fw-bold shadow-sm hover-lift">
+                        <i class="fas fa-home me-2"></i> Bosh sahifa
+                    </a>
+                </div>
+                <div class="col-sm-auto">
+                    <button onclick="window.location.reload()" class="btn btn-white w-100 px-5 py-3 rounded-4 fw-bold shadow-sm hover-lift border">
+                        <i class="fas fa-sync-alt me-2 text-primary"></i> Qayta tekshirish
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <p class="small text-uppercase fw-black text-muted opacity-25 tracking-widest mb-0">
+                    Sistemaviy xatolik kodi: <span class="text-danger">ERR_USER_DEPT_VOID_01</span>
+                </p>
+                <a href="#" class="text-decoration-none small fw-bold text-primary mt-2 d-inline-block">
+                    <i class="fas fa-headset me-1"></i> Texnik qo'llab-quvvatlash
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Senior UI elementlari */
+    .fw-black { font-weight: 900; }
+    .tracking-tight { letter-spacing: -1.5px; }
+    .tracking-widest { letter-spacing: 3px; }
+    
+    .text-primary-gradient {
+        background: linear-gradient(135deg, #4F46E5 0%, #3B82F6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 15px 25px rgba(79, 70, 229, 0.3));
+    }
+
+    /* Fon animatsiyasi */
+    .error-blob {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 180px; height: 180px;
+        background: radial-gradient(circle, rgba(79, 70, 229, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 0;
+    }
+
+    /* Floating Icons */
+    .floating-icons i { position: absolute; }
+    .floating-1 { top: -10px; right: -20px; animation: float 4s ease-in-out infinite; }
+    .floating-2 { bottom: 20px; left: -30px; animation: float 6s ease-in-out infinite reverse; }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Hover Effektlari */
+    .hover-lift {
+        transition: all 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important;
+    }
+
+    .btn-white {
+        background: white;
+        color: #0f172a;
+    }
+
+    .leading-relaxed { line-height: 1.6; }
+</style>
+{% endblock %}

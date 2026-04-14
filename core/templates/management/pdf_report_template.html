@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .title { font-size: 20px; font-weight: bold; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { bg-color: #f2f2f2; }
+        .footer { margin-top: 50px; text-align: right; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>DMS ACADEMY - ELEKTRON TA'LIM TIZIMI</h2>
+        <p>Rasmiy Kafedra Hisoboti</p>
+    </div>
+
+    <div class="title text-center">Kafedra: {{ dept.name }}</div>
+    <p>Sana: {{ date|date:"d.m.Y H:i" }}</p>
+    <p>Kafedra o'rtacha o'zlashtirish ko'rsatkichi: <strong>{{ overall_avg|floatformat:1 }}%</strong></p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Kursant F.I.O</th>
+                <th>O'rtacha Ball</th>
+                <th>Holat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.get_full_name }}</td>
+                <td>{{ s.avg_score|floatformat:1 }}%</td>
+                <td>{% if s.avg_score < 60 %}Nazoratda{% else %}Yaxshi{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Kafedra boshlig'i: _________________ ({{ head_name }})</p>
+        <p>M.O'. (Muxr o'rni)</p>
+    </div>
+</body>
+</html>

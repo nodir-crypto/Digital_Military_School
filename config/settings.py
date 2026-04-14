@@ -24,7 +24,6 @@ SECRET_KEY = 'django-insecure-qpf0bzc2==n-vszuh_**8w9efji2jpid3h!@tt2l@%e(x8ct!k
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 ALLOWED_HOSTS = []
 
 
@@ -61,6 +60,8 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'core.context_processors.ranking_context',
+                'core.context_processors.notification_context',
+                'core.context_processors.system_status_context', # Buni ham qo'shib qo'ying
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -130,7 +131,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-LOGIN_REDIRECT_URL = 'home'      # Login bo'lgach bosh sahifaga
+LOGIN_REDIRECT_URL = 'login_success'     # Login bo'lgach bosh sahifaga
 LOGOUT_REDIRECT_URL = 'login'    # Chiqqandan so'ng login sahifasiga
 LOGIN_URL = 'login'              # Login qilinmagan bo'lsa yo'naltiriladigan joy
 
